@@ -1,0 +1,2 @@
+def pct(p: double, tot: double):
+    return 100*p / tot
