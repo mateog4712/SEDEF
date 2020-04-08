@@ -1,25 +1,12 @@
 import sys
 import getopt
-import os 
+import os
+from common.seq import *
 
 
 
 # def bucket_alignments_extern(bed_path,nbins,output_dir, extends):
-#     files = []
-#     # # Still need file checking in seq
-#     # if(file_exists):
-#     #     files.append(bed_path)
-#     # elif(directory_exists):
-#     #     for i in bed_path:
-#     #         files.append(bed_path[i])
-#     # else:
-#     #     print("Path " + bed_path + " is neither file nor directory")
-#     #     sys.exit(0)
-#     # # end
-
-
-
-    
+#     files = []    
 #     hits = [] # vector of hits
 #     #map<string, FILE *> tmp_bins;
 # 	#map<string, int> lens;
@@ -69,7 +56,8 @@ import os
 
 def align_main(opts,args):
 
-    if args[0] == "bucket":
+    command =args[0]
+    if command == "bucket":
         nbins = -1
         for o,a in opts:
             if o in ("-n","--bins"):
@@ -77,8 +65,8 @@ def align_main(opts,args):
         if nbins == -1:
             print("Must provide number of bins (--bins)")
             sys.exit(0)	
-        #bucket_alignments_extern("chr22.fa",nbins,"hello",True)#(cmdl[1], nbins, cmdl[2], true);
-    elif args[0] == "generate":
+        bucket_alignments_extern("chr22.fa",nbins,"hello",True)#(cmdl[1], nbins, cmdl[2], true);
+    elif command == "generate":
         kmer_size = -1
         for o,a in opts:
             if o in ("-k","--kmer"):
@@ -87,4 +75,4 @@ def align_main(opts,args):
             print("Must provide k-mer size (--kmer)")
             sys.exit(0)
 		
-	#generate_alignments(cmdl[1], cmdl[2], kmer_size);		
+	    generate_alignments(cmdl[1], cmdl[2], kmer_size);		
