@@ -32,11 +32,11 @@ def hash_dna(c):
 	return 1#dna_hash_lookup.val[c]
 
 
-# inline char align_dna(char c):
-# 	return dna_align_lookup.val[c]
+def align_dna(char c):
+ 	return 2#dna_align_lookup.val[c]
 
-# inline char rev_dna(char c):
-# 	return rev_comp_lookup.val[c]
+def rev_dna(c):
+ 	return 3#rev_comp_lookup.val[c]
 
 
 # template<class X, class Y>
