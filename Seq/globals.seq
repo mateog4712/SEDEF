@@ -44,7 +44,7 @@ class Search:
         self.MIN_READ_SIZE = KB * (1 - self.MAX_ERROR)
 
         # search.cc
-        self.MAX_SD_SIZE = 1 * 1024 * 1024; # 1MB at most
+        self.MAX_SD_SIZE = 1 * 1024 * 1024 # 1MB at most
 class Hash:
     INDEX_CUTOFF: float
     # hash.cc
@@ -65,7 +65,7 @@ class Align: # Full SD alignment (via KSW)
         self.GAP_EXTEND = -1
 
         # align.cc
-        self.MAX_KSW_SEQ_LEN = 60 * KB;
+        self.MAX_KSW_SEQ_LEN = 60 * KB
 class Extend: # Extension of initial SDs
     RATIO: int
     MAX_EXTEND: int
@@ -129,8 +129,8 @@ class Stats:
         MAX_SCALED_ERROR = 0.5
 
         # Minimum number of consecutive Ns needed to call assembly gap
-        MIN_ASSEMBLY_GAP_SIZE = 100;
-        BIG_OVERLAP_THRESHOLD = 100;
+        MIN_ASSEMBLY_GAP_SIZE = 100
+        BIG_OVERLAP_THRESHOLD = 100
 
 
 class Internal:
