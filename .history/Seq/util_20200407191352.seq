@@ -1,0 +1,11 @@
+
+def rc(s):
+    r=s
+    r=r[::-1]
+string rc(const string &s)
+{
+	auto r = s;
+	reverse(r.begin(), r.end());
+	transform(r.begin(), r.end(), r.begin(), rev_dna);
+	return r;
+}

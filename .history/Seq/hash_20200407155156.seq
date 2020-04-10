@@ -1,0 +1,14 @@
+class Hash {
+    Status: str
+    hash: int
+
+    def __init__(self: Hash, hash: int, status: str):
+        self.hash = hash
+        self.status = status
+
+	enum Status {
+		HAS_UPPERCASE, ALL_LOWERCASE, HAS_N
+	};
+	uint32_t hash; 
+	Status status; // 2 if N, 1 if lowercase, 0 otherwise
+};

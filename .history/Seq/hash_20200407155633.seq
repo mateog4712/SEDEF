@@ -1,0 +1,24 @@
+class Hash:
+    Status: str
+    hash: int
+
+    def __init__(self: Hash, hash: int, status: str):
+        self.hash = hash
+        self.status = status
+
+class Minimizer:
+	hash: Hash
+	loc: int
+    def __init__(self: Minizer, hash: Hash, loc: int):
+        self.hash = hash
+        self.loc = loc
+class Sequence:
+	name: str
+	seq: str
+	is_rc: bool
+
+	Sequence(const std::string &name, const std::string &seq, bool is_rc = false);
+
+
+
+	

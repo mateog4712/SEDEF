@@ -1,0 +1,14 @@
+class Hash:
+    Status: str
+    hash: int
+
+    def __init__(self: Hash, hash: int, status: str):
+        self.hash = hash
+        self.status = status
+
+class Minimizer:
+	Hash hash;
+	int loc;
+
+
+	

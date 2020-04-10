@@ -1,0 +1,109 @@
+from globals import *
+
+
+class Hash:
+
+    Status: int
+    hash: int
+    statuses: list[str]
+
+    def __init__(self: Hash, hash: int, status: str):
+        self.hash = hash
+        self.status = status
+        self.statuses = list[str]()
+        self.statuses = ["HAS_UPPERCASE", "ALL_LOWERCASE", "HAS_N"]
+
+class Minimizer:
+	hash: Hash
+	loc: int
+    def __init__(self: Minizer, hash: Hash, loc: int):
+        self.hash = hash
+        self.loc = loc
+class Sequence:
+	name: str
+	seq: str
+	is_rc: bool
+
+	def __init__(self: Sequence, name: str, seq: str, is_rc: bool):
+        self.name = name
+        self.seq = seq
+        self.is_rc = is_rc
+
+
+class Index:
+	kmer_size: int 
+	window_size: int
+	threshold: int
+
+	Sequence seq
+
+	minimizers: list[Minimizer]
+    index: dict[Hash, list[int]]
+
+	def __init__(self:Index,seq: Sequence, kmer_size: int, window_size: int, separate_lowercase: bool):
+        self.seq = seq
+        self.kmer_size = kmer_size
+        self.window_size = window_size
+
+        assert(kmer_size <= 16)
+        minimizers = get_minimizers(seq, kmer_size, window_size, separate_lowercase)
+
+        for i in minimizers:
+            index.setdefault(i.hash,list[int]()).append(i.loc)
+        h = Hash()
+        ignore = (minimizers.size() * h.INDEX_CUTOFF) / 100.0
+        dict[int,int] hist
+        for i in index:
+            hist[i.second.size()] += 1
+        sum = 0
+	    self.threshold = 1 << 31
+        j = 0
+        for i in hist.keys():
+            sum += hist[i]
+            if sum <= ignore:
+                threshold = i
+            else:
+                break
+        
+
+
+
+	# Find first minimizer at loci p
+	# def find_minimizers(p:int):
+
+def get_minimizers(s,kmer_size, window_size, separate_lowercase):
+    minimizers = list[Minimizer]((2 * s.size()) / window_size)
+    window = list[Minimizer]
+    MASK = (1 << (2 * kmer_size)) - 1
+    h = 0
+    last_n = - kmer_size - window_size
+    last_u = last_n
+    for i in range(0,len(s)):
+        if (s[i].upper() == 'N'):
+
+			last_n = i
+		elif (s[i]isupper()):
+			last_u = i
+        h = ((h << 2) | hash_dna(s[i])) & MASK
+        if (i < kmer_size - 1):
+            continue
+        Hash hh (h, last_n >= h.statuses.index("HAS_N") if (i - kmer_size + 1) else (last_u >= h.statuses.index("HAS_UPPERCASE" if (i - kmer_size + 1)) else h.statuses.index("ALL_LOWERCASE"))
+        if (not separate_lowercase and hh.status == Hash::Status::ALL_LOWERCASE) {
+			hh.status = h.statuses.index("HAS_UPPERCASE")
+		}
+		while (window and not (window[-1].hash < hh)):
+			window.pop_back();
+        # check this 
+		while (window and window[-1]loc < (i - kmer_size + 1) - window_size) {
+			window.pop();
+		}
+		window.append(Hash(hh, i - kmer_size + 1));
+
+		if (i - kmer_size + 1 < window_size) 
+			continue;
+		if (!minimizers.size() || !(window.front() == minimizers.back())) {
+			minimizers.push_back(window.front());
+		}
+	}
+	return minimizers;
+}

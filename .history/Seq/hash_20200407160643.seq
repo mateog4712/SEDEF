@@ -1,0 +1,43 @@
+class Hash:
+    Status: str
+    hash: int
+
+    def __init__(self: Hash, hash: int, status: str):
+        self.hash = hash
+        self.status = status
+
+class Minimizer:
+	hash: Hash
+	loc: int
+    def __init__(self: Minizer, hash: Hash, loc: int):
+        self.hash = hash
+        self.loc = loc
+class Sequence:
+	name: str
+	seq: str
+	is_rc: bool
+
+	def __init__(self: Sequence, name: str, seq: str, is_rc: bool):
+        self.name = name
+        self.seq = seq
+        self.is_rc = is_rc
+
+
+class Index {
+	kmer_size: int 
+	window_size: int
+	threshold: int
+
+	Sequence seq
+
+	minimizers: list[Minimizer]
+    index: dict[Hash, list[int]]
+	std::unordered_map<Hash, std::list<int>> index;
+
+public:
+	Index(std::shared_ptr<Sequence> seq, int kmer_size, int window_size, bool separate_lowercase = true);
+
+	// Find first minimizer at loci p
+	int find_minimizers(int p) const;
+};
+	

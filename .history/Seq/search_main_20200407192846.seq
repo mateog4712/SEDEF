@@ -7,11 +7,10 @@ INTERVAL_FAILED
 
 # int initial_search(shared_ptr<Index> query_hash, shared_ptr<Index> ref_hash, bool is_same_genome, 
 # 	T print_function, bool show_progress=true)
-def initial_search(query_hash, ref_hash, is_same_genome, print_function, show_progress=True):
-    
+def initial_search(query_hash, ref_hash, is_same_genome, print_function, show_progress=true):
 
 
 
 def search_main(opts,args):
-
+    
     print("Hello")

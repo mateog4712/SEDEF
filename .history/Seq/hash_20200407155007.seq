@@ -1,0 +1,10 @@
+class Hash {
+    Status: str
+    hash: int
+
+	enum Status {
+		HAS_UPPERCASE, ALL_LOWERCASE, HAS_N
+	};
+	uint32_t hash; 
+	Status status; // 2 if N, 1 if lowercase, 0 otherwise
+};
