@@ -12,8 +12,8 @@
 #     }
 	
 
-# constexpr auto dna_hash_lookup  = DNA(0);
-# constexpr auto dna_align_lookup = DNA(4);
+# def dna_hash_lookup()  = DNA(0)
+# def dna_align_lookup() = DNA(4)
 
 # struct RDNA:
 # 	char val[128];
@@ -29,14 +29,15 @@
 # constexpr auto rev_comp_lookup = RDNA();
 
 def hash_dna(c):
-	return 1#dna_hash_lookup.val[c]
+	return int(seq(c))#dna_hash_lookup.val[c]
 
 
-def align_dna(char c):
- 	return 2#dna_align_lookup.val[c]
+def align_dna(c):
+ 	return int(seq(c))#dna_align_lookup.val[c]
 
 def rev_dna(c):
- 	return 3#rev_comp_lookup.val[c]
+
+ 	return str(~seq(c))#rev_comp_lookup.val[c]
 
 
 # template<class X, class Y>
