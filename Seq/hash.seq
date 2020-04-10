@@ -30,7 +30,7 @@ class Sequence:
         self.seq = seq
         self.is_rc = is_rc
         if (is_rc):
-            seq = rc(seq)
+            self.seq = rc(seq)
         
 
 def get_minimizers(s,kmer_size, window_size, separate_lowercase):
