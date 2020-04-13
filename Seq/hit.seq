@@ -10,8 +10,8 @@ class Hit:
     jaccard: int
     name: str
     comment: str
-    #aln: Alignment
-    def __init__(self:Hit, query:Sequence, query_start:int, query_end:int, ref:Sequence, ref_start:int, ref_end:int, jaccard:int, name:str, comment:str):
+    aln: Alignment
+    def __init__(self:Hit, query:Sequence, query_start:int, query_end:int, ref:Sequence, ref_start:int, ref_end:int, jaccard:int, name:str, comment:str, aln:Alignment):
         self.query = query
         self.query_start = query_start
         self.query_end = query_end
@@ -119,5 +119,5 @@ class Hit:
 
 
 
-def get_position():
+def get_position(ar: list[tuple[int,str]], ppos:int):
     print('yes')
