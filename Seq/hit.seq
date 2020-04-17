@@ -1,5 +1,6 @@
 from hash import *
-#from align import *
+# from align import Alignment
+from bio import CIGAR
 class Hit:
     query: Sequence
     query_start: int
@@ -21,13 +22,13 @@ class Hit:
         self.jaccard = jaccard
         self.name = name
         self.comment = ""
-        #self.aln = aln
+        self.aln = aln
 
     
-    def from_bed(bed,cigar):
+    def from_bed(bed):
         ss = bed.split()
         assert(len(ss)>=10)
-        h = Hit(Sequence(ss[0],"",(ss[8])[0] != '+'),0,0, Sequence(ss[3],"",(ss[0])[0] != '+'),0,0,0,"","")
+        h = Hit(Sequence(ss[0],"",(ss[8])[0] != '+'),0,0, Sequence(ss[3],"",(ss[0])[0] != '+'),0,0,0,"","", Alignment())
         h.query_start = int(ss[1])
         h.query_end = int(ss[2])
         h.ref_start = int(ss[4])
@@ -37,20 +38,26 @@ class Hit:
             h.comment = ss[14]
         if(len(ss)>=14):
             h.jaccard = int(ss[13])
-        if(len(ss)>=13):
-            cigar = ss[12]
-        return h 
+        # if(len(ss)>=13):
+            # cigar = CIGAR(ss[12])
+        
+        return h
+
         
 
-    def from_bed2(bed: str,query: Sequence,ref: Sequence):
+    def from_bed(bed: str,query: Sequence,ref: Sequence):
+        
         ss = bed.split()
         assert(len(ss)>=10)
 
-        h = Hit(query,0,0,ref,0,0,0,"","")
+        h = Hit(query,0,0,ref,0,0,0,"","",Alignment())
+
         h.query_start = int(ss[1])
         h.query_end = int(ss[2])
+
         h.ref_start = int(ss[4])
         h.ref_end = int(ss[5])
+
         assert(h.query.is_rc == (ss[8][0] != '+'))
         assert(h.ref.is_rc == (ss[9][0] != '+'))
 
@@ -66,8 +73,9 @@ class Hit:
         h.name = ss[6]
         if(len(ss)>=14):
             h.jaccard = int(ss[13])
-        # if(len(ss)>=13):
-        #     h.aln = Alignment(query.seq,ref.seq,ss[12])
+        if(len(ss)>=13):
+            # change ending back once good bed string is given
+            h.aln = Alignment(query.seq,ref.seq,CIGAR("5M"))#ss[12]))
 
         return h
 
@@ -110,14 +118,14 @@ class Hit:
         self.ref_start = max(0,self.ref_start-w)
         self.ref_end += w
     
-    # def update_from_alignment(self: Hit):
-    #     self.query_start = self.aln.start_a
-    #     self.query_end = self.aln.end_a
-    #     self.ref_start = self.aln.start_b
-    #     self.ref_end = self.aln.end_a
+    def update_from_alignment(self: Hit):
+        self.query_start = self.aln.start_a
+        self.query_end = self.aln.end_a
+        self.ref_start = self.aln.start_b
+        self.ref_end = self.aln.end_a
 
 
 
 
-def get_position(ar: list[tuple[int,str]], ppos:int):
+def get_position(ar: CIGAR, ppos:int):
     print('yes')
