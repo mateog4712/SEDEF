@@ -84,7 +84,7 @@ class Alignment:
 		self.populate_nice_alignment()
 
 
-	def __init__(self: Alignment, fa: str, fb: str, cigar: CIGAR):
+	def __init__(self: Alignment, fa: str, fb: str, cigar: str):
 		self.chr_a = 'A'
 		self.chr_b = 'B'
 		self.start_a = 0
@@ -93,7 +93,7 @@ class Alignment:
 		self.end_b = len(fb)
 		self.a = fa
 		self.b = fb
-		self.cigar = cigar
+		self.cigar = CIGAR(cigar)
 		self.populate_nice_alignment()
 
 	def __init__(self: Alignment, qstr: str, rstr:str, guide: list[Hit], side:int):
@@ -664,7 +664,7 @@ class Alignment:
 
 	### Utilities
 	def cigar_string(self: Alignment):
-		print(str(self.cigar))
+		return str(self.cigar)
 
 	def printD(width = 100, only_alignment=False):
 		print("no")

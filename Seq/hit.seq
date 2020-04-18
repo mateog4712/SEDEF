@@ -12,6 +12,7 @@ class Hit:
     name: str
     comment: str
     aln: Alignment
+
     def __init__(self:Hit, query: Sequence, query_start: int, query_end: int, ref: Sequence, ref_start: int, ref_end: int, jaccard: int, name: str, comment: str):
         self.query = query
         self.query_start = query_start
@@ -97,6 +98,7 @@ class Hit:
         return h
     
     def to_bed(self: Hit, do_rc = True, with_cigar = True, file = ""):
+        #print(self.aln)
         assert(~self.query.is_rc)
         qn = self.query.name
         rn = self.ref.name

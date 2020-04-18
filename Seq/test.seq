@@ -1,0 +1,37 @@
+from hash import *
+import collections
+from bio import CIGAR
+from align import *
+from globals import *
+s = Sequence("query","ACGTT",True)
+r = Sequence("ref","TGCAA",True)
+a = Alignment()
+h = Hit(s,15,20,s,150,200,0,"","")
+# #extend(h,2.0,300)
+# print(h.query_start)
+# h.extends(2.0,300)
+# print(h.ref_start)
+# print(h.ref_end)
+line = "chr11   108692452   108693443   chr2    100986072   100987075       18.9    +   +   1003    1024    104M1I126M2D114M10I85M4I29M15I26M1I103M4D22M15D301M2I60M    m=13.7;g=5.3"
+# cols = line.split()
+# name = "5M"
+# cig = CIGAR(name)
+a
+x = Hit.from_bed(line)
+print(x.query_start)
+print(a.span())
+print(x.to_bed())
+# # # print(h.query.name)
+
+# a = Alignment("ACGTT","TGCAA", cig)
+# # a.populate_nice_alignment()
+# # print(a.alignment)
+# #cig.remove(1)
+# back = str(1)+'A'
+# print(back)
+# alig = Align()
+# #print(alig.MATCH)
+# # alignment = s"ACGT"
+# # print(int(alignment.as_int()))
+# a = s'ACGT'
+# print(len(a))

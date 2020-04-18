@@ -1,54 +1,53 @@
 import sys
 import getopt
 import os
-from common.seq import *
+from common import *
+from align import *
 
 
 
-# def bucket_alignments_extern(bed_path,nbins,output_dir, extends):
-#     files = []    
-#     hits = [] # vector of hits
-#     #map<string, FILE *> tmp_bins;
-# 	#map<string, int> lens;
-#     tmp_bins = dict[str,int]()
-#     lens = dict[str,int]()
-#     ix = 0
-#     total_nhits=0
-#     for file in files:
-#         f=open(file,"r")
-#         nhits = 0;
-#         f1 = f.readline()
-#         for x in f1:
-#             # hit h = hit::from_bed(s)
-#             h = x
-#             # redo
-#             if(extend):
-#                 h.extend(Globals::Extend::RATIO, Globals::Extend::MAX_EXTEND)
+def bucket_alignments_extern(bed_path,nbins,output_dir, extends):
+    files = list[str]()    
+    hits = list[Hit]() # vector of hits
+    #map<string, FILE *> tmp_bins;
+	#map<string, int> lens;
+    tmp_bins = dict[str,int]()
+    lens = dict[str,int]()
+    ix = 0
+    total_nhits=0
+    for file in files:
+        f = open(file,"r")
+        nhits = 0;
+        for s in f.readline():
+            h = Hit.from_bed(s)
+            e = Extend()
+            if(extends):
+                h.extends(e.RATIO,e.MAX_EXTEND)
             
-#             # redo            
-#             if (tie(h.query->name, h.query_start, h.query_end) > tie(h.ref->name, h.ref_start, h.ref_end)):
-# 				swap(h.query->name, h.ref->name);
-# 				swap(h.query_start, h.ref_start);
-# 				swap(h.query_end, h.ref_end);
-			
-#             # redo
-#             # Bucket reads to allow external sorting
-# 			string fno = output_dir + fmt::format("/tmp_{}_{}.tmp", h.query->name, h.ref->name);
-# 			auto it = tmp_bins.find(fno);
-# 			if (it == tmp_bins.end()):
-# 				tmp_bins[fno] = fopen(fno.c_str(), "w");
-# 				it = tmp_bins.find(fno);
-			
-#             FILE *fo = it->second;
-# 			fputs(h.to_bed(false).c_str(), fo);
-# 			fputs("\n", fo);
-# 			lens[fno]++;
+            #assert()
+            #assert()
+            if(h.query.name > h.ref.name and h.query_start > h.ref_start and h.query_end > h.ref_end):
+                temp = h.query.name
+                h.query.name = h.ref.name
+                h.ref.name = temp
 
-# 			# hits.push_back(h);
-# 			nhits++; total_nhits++;
-        
-#         eprnn("\rRead {:10} alignments in {}         ", nhits, file);
-		
+                temp = h.query_start
+                h.query_start = h.ref_start
+                h.ref_start = temp
+
+                temp = h.query_end
+                h.query_end = h.ref_end
+                h.ref_end = temp
+            
+            fno = output_dir + "/tmp_" + h.query.name + "_" + h.ref.name + ".tmp"
+            if fno not in tmp_bins:
+                tmp_bins[fno]
+
+            else:    
+                it = tmp_bins.get(fno)
+
+
+
 
 
 
@@ -65,7 +64,7 @@ def align_main(opts,args):
         if nbins == -1:
             print("Must provide number of bins (--bins)")
             sys.exit(0)	
-        bucket_alignments_extern("chr22.fa",nbins,"hello",True)#(cmdl[1], nbins, cmdl[2], true);
+        #bucket_alignments_extern("chr22.fa",nbins,"hello",True)#(cmdl[1], nbins, cmdl[2], true);
     elif command == "generate":
         kmer_size = -1
         for o,a in opts:
@@ -75,4 +74,4 @@ def align_main(opts,args):
             print("Must provide k-mer size (--kmer)")
             sys.exit(0)
 		
-	    generate_alignments(cmdl[1], cmdl[2], kmer_size);		
+	    # generate_alignments(cmdl[1], cmdl[2], kmer_size);		
