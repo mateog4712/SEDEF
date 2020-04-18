@@ -12,7 +12,7 @@ class Hit:
     name: str
     comment: str
     aln: Alignment
-    def __init__(self:Hit, query:Sequence, query_start:int, query_end:int, ref:Sequence, ref_start:int, ref_end:int, jaccard:int, name:str, comment:str, aln:Alignment):
+    def __init__(self:Hit, query: Sequence, query_start: int, query_end: int, ref: Sequence, ref_start: int, ref_end: int, jaccard: int, name: str, comment: str):
         self.query = query
         self.query_start = query_start
         self.query_end = query_end
@@ -22,10 +22,10 @@ class Hit:
         self.jaccard = jaccard
         self.name = name
         self.comment = ""
-        self.aln = aln
+        self.aln = Alignment()
 
     
-    def from_bed(bed):
+    def from_bed(bed: str):
         ss = bed.split()
         assert(len(ss)>=10)
         h = Hit(Sequence(ss[0],"",(ss[8])[0] != '+'),0,0, Sequence(ss[3],"",(ss[0])[0] != '+'),0,0,0,"","", Alignment())
@@ -38,19 +38,19 @@ class Hit:
             h.comment = ss[14]
         if(len(ss)>=14):
             h.jaccard = int(ss[13])
-        # if(len(ss)>=13):
-            # cigar = CIGAR(ss[12])
+        if(len(ss)>=13):
+            cigar = CIGAR(ss[11])
         
         return h
 
         
 
-    def from_bed(bed: str,query: Sequence,ref: Sequence):
+    def from_bed2(bed: str,query: Sequence,ref: Sequence):
         
         ss = bed.split()
         assert(len(ss)>=10)
 
-        h = Hit(query,0,0,ref,0,0,0,"","",Alignment())
+        h = Hit(query,0,0,ref,0,0,0,"","")
 
         h.query_start = int(ss[1])
         h.query_end = int(ss[2])
@@ -74,8 +74,9 @@ class Hit:
         if(len(ss)>=14):
             h.jaccard = int(ss[13])
         if(len(ss)>=13):
-            # change ending back once good bed string is given
-            h.aln = Alignment(query.seq,ref.seq,CIGAR("5M"))#ss[12]))
+            
+            print("")# change ending back once good bed string is given
+            #h.aln = Alignment(query.seq,ref.seq,ss[12]))
 
         return h
 
@@ -95,10 +96,22 @@ class Hit:
         
         return h
     
-    def to_bed(self: Hit, do_rc:bool, with_cigar:bool, file:str):
+    def to_bed(self: Hit, do_rc = True, with_cigar = True, file = ""):
         assert(~self.query.is_rc)
         qn = self.query.name
         rn = self.ref.name
+        
+        qs = 0
+        if(do_rc and self.query.is_rc):
+            qs = len(self.query.seq) - self.query_end + 1
+        else:
+            qs = self.query_start
+        qe = 0
+        if(do_rc and self.query.is_rc):
+            qe = len(self.query.seq) - self.query_start + 1
+        else:
+            qe = self.query_end
+
         rs = 0
         if(do_rc and self.ref.is_rc):
             rs = len(self.ref.seq) - self.ref_end + 1
@@ -109,6 +122,37 @@ class Hit:
             re = len(self.ref.seq) - self.ref_start + 1
         else:
             re = self.ref_end
+
+        bed = qn + "\t" + str(qs) + "\t" + str(qe) + "\t" + rn + "\t" + str(rs) + "\t" + str(re) + "\t" + self.name
+        if(self.aln.span()):
+            bed = bed + "\t" + str(self.aln.total_error())
+        else:
+            bed = bed + "\t" + ""
+        
+        if(self.query.is_rc):
+            bed = bed + "\t" + "-"
+        else:
+            bed = bed + "\t" + "+"
+        
+        if(self.ref.is_rc):
+            bed = bed + "\t" + "-"
+        else:
+            bed = bed + "\t" + "+"
+        
+        bed = bed + "\t" + str(max(self.query_end-self.query_start,self.ref_end-self.ref_start))
+        bed = bed + "\t" + str(self.aln.span())
+        if(with_cigar):
+            bed = bed + "\t" + self.aln.cigar_string()
+        else:
+            bed = bed + "\t" + ""
+        
+        if(self.aln.span()):
+            bed = bed + "\t" + "m=" + str(self.aln.mismatch_error()) + ";g=" + str(self.gap_error())
+        else:
+            bed = bed + "\t" + ""
+        
+        return bed
+
     
     def extends(self: Hit, factor: float, max_entend:int):
         w = max(self.query_end-self.query_start,self.ref_end-self.ref_start)
