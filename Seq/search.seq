@@ -1,0 +1,5 @@
+from hit import *
+
+def search(qi, query_hash, ref_hash, tree, is_same_genome,MIN_READ_SIZE, m, p):
+    
+    return True

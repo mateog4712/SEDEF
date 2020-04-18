@@ -1,0 +1,7 @@
+class FastaReference:
+    index: dict[str,seq]
+    def __init__(self:FastaReference, path_to_file: str):
+        for i in FASTA(FastaReference):
+            self.index[i.name] = i.seq
+    def get_sequence(self:FastaReference, key:str):
+        return self.index[key]
