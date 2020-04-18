@@ -45,10 +45,12 @@ class Search:
 
         # search.cc
         self.MAX_SD_SIZE = 1 * 1024 * 1024 # 1MB at most
-class Hash:
+    def __str__(self:Search):
+        return f'{self.KMER_SIZE}\t{self.WINDOW_SIZE}\t{self.MIN_UPPERCASE}\t{self.MAX_ERROR}\t{self.MAX_EDIT_ERROR}\t'
+class HashGlobal:
     INDEX_CUTOFF: float
     # hash.cc
-    def __init__(self: Hash):
+    def __init__(self: HashGlobal):
         self.INDEX_CUTOFF = 0.001
 class Align: # Full SD alignment (via KSW)
     # align_main.cc + align.cc

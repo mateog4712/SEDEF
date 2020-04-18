@@ -15,14 +15,14 @@ INTERVAL_FAILED=0
 
 # int initial_search(shared_ptr<Index> query_hash, shared_ptr<Index> ref_hash, bool is_same_genome, 
 # 	T print_function, bool show_progress=true)
-def initial_search(query_hash, ref_hash, is_same_genome, print_function, show_progress=True):
+def initial_search(query_hash: Index, ref_hash: Index, is_same_genome: bool,s):
     tree = Tree()
     total = 0
     track = 0
     next_to_attain = 0
     TRACK_PROGRESS = 10000
 
-    Search2 =  Search()
+    Search2 =  s
 
     internal = Internal()
     Hash = Hash()
@@ -35,36 +35,40 @@ def initial_search(query_hash, ref_hash, is_same_genome, print_function, show_pr
         if (internal.DoUppercaseSeeds and qm.hash.status != Hash.statuses.index("HAS_UPPERCASE")):
             continue
         hits = search(qi, query_hash, ref_hash, tree, is_same_genome,Search2.MIN_READ_SIZE, True, False)
-        min_len = len(query_hash.seq)
+        min_len = len(query_hash.seq.seq)
         for pp in hits:
             min_len = min(min_len, pp.query_end - pp.query_start)
             #print_function(pp);
         total += len(hits)
 
-        next_to_attain = ( qm.loc + (Search2.MIN_READ_SIZE * Search2.MAX_ERROR) / 2 if min_len >= Search2.MIN_READ_SIZE else qm.loc)
+        # next_to_attain = ( qm.loc + (Search2.MIN_READ_SIZE * Search2.MAX_ERROR) / 2 if min_len >= Search2.MIN_READ_SIZE else qm.loc)
     return total
 
 def help1(h):
     print (h.to_bed())
 
-def search_single(ref_path, query_chr,ref_chr,  is_ref_complement,  kmer_size,  window_size):
+
+def search_single(ref_path, query_chr,ref_chr,  is_ref_complement,  kmer_size,  window_size,s):
     is_same_genome = (ref_chr == query_chr) and not is_ref_complement
     fr = FastaReference(ref_path)
 
     ref = fr.get_sequence(ref_chr)
-    ref_hash = Index(Sequence(ref_chr, ref, is_ref_complement), kmer_size, window_size)
-    query_hash = ref_hash
+    ref_hash = Index(Sequence(ref_chr, ref, is_ref_complement), kmer_size, window_size,True)
+    query_hash = Index(ref_hash)
     
     if (not is_same_genome):
-		query = fr.get_sequence(query_chr)
-		query_hash = Index(Sequence(query_chr, query), kmer_size, window_size)
-    total = initial_search(query_hash, ref_hash, is_same_genome, help1)
+        query = fr.get_sequence(query_chr)
+        query_hash = Index(Sequence(query_chr, query,False), kmer_size, window_size, True)
+    total = initial_search(query_hash, ref_hash, is_same_genome,s)
+    #help1
+    # total = 0
     print (f'Total:\t{total}')
-	
     
 
 
 def search_main(opts,args):
+    print f'{args}'
+    print f'{opts}'
     s = Search()
     is_complement  = False
     if (len(args)>0):

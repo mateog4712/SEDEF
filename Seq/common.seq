@@ -28,8 +28,8 @@
 
 # constexpr auto rev_comp_lookup = RDNA();
 
-def hash_dna(c):
-	return int(seq(c))#dna_hash_lookup.val[c]
+def hash_dna(c:seq) -> int:
+	return int(c.__int__())#dna_hash_lookup.val[c]
 
 
 def align_dna(c):
@@ -50,4 +50,4 @@ def rev_dna(c):
 
 
 def pct(p: float, tot: float):
-    return 100*p / tot
+    return 100*p/tot

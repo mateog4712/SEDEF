@@ -45,6 +45,7 @@ def bucket_alignments_extern(bed_path,nbins,output_dir, extends):
 
             else:    
                 it = tmp_bins.get(fno)
+                
 
 
 

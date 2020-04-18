@@ -3,10 +3,10 @@ import collections
 from bio import CIGAR
 from align import *
 from globals import *
-s = Sequence("query","ACGTT",True)
-r = Sequence("ref","TGCAA",True)
-a = Alignment()
-h = Hit(s,15,20,s,150,200,0,"","")
+# s = Sequence("query","ACGTT",True)
+# r = Sequence("ref","TGCAA",True)
+# a = Alignment()
+# h = Hit(s,15,20,s,150,200,0,"","")
 # #extend(h,2.0,300)
 # print(h.query_start)
 # h.extends(2.0,300)
@@ -16,11 +16,12 @@ line = "chr11   108692452   108693443   chr2    100986072   100987075       18.9
 # cols = line.split()
 # name = "5M"
 # cig = CIGAR(name)
-a
-x = Hit.from_bed(line)
-print(x.query_start)
-print(a.span())
-print(x.to_bed())
+# a
+# x = Hit.from_bed(line)
+# print(x.query_start)
+# print(a.span())
+f = open("test.txt","w")
+f.close()
 # # # print(h.query.name)
 
 # a = Alignment("ACGTT","TGCAA", cig)

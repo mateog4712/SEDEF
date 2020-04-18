@@ -1,4 +1,4 @@
 from common import *
 
-def rc(s):
-    return str(~ seq(s))
+def rc(s: seq):
+    return ~s

@@ -1,0 +1,2 @@
+f = FASTA('test.fa')
+print f['chr1']
