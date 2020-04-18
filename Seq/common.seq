@@ -49,5 +49,5 @@ def rev_dna(c):
 
 
 
-# def pct(p: double, tot: double):
-#     return 100*p / tot
+def pct(p: float, tot: float):
+    return 100*p / tot
