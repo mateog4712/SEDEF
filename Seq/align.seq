@@ -12,14 +12,6 @@ def ceq(a:str, b:str):
 	return(a.upper() == b.upper())
 
 
-def align_helper(qseq:str, tseq:str, sc_mch:int, sc_mis:int, gapo:int, gape:int, bandwidth:int):
-	a = sc_mch
-	b = sc_mis
-
-
-
-
-
 class AlignmentError:
 	gaps: int
 	gap_bases: int
@@ -78,9 +70,8 @@ class Alignment:
 		xa = seq(fa)
 		xb = seq(fb)
 		alig = Align()
-		#transform
-		#transform
-		cigar = align_helper(xa,xb,alig.MATCH,alig.MISMATCH,-alig.GAP_OPEN,-alig.GAP_EXTEND,-1)
+		aln = xa.align(xb,a=alig.MATCH,b=alig.MISMATCH,gapo=-alig.GAP_OPEN,gape=-alig.GAP_EXTEND)
+		self.cigar = aln.cigar
 		self.populate_nice_alignment()
 
 
@@ -716,5 +707,3 @@ def process(hs: Hit, cigar: CIGAR):
 
 def trimlower(h: Hit):
 	print("no")
-
-	

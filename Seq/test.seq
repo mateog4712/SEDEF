@@ -3,6 +3,10 @@ import collections
 from bio import CIGAR
 from align import *
 from globals import *
+from hit import *
+import math
+from merge import *
+from time import *
 # s = Sequence("query","ACGTT",True)
 # r = Sequence("ref","TGCAA",True)
 # a = Alignment()
@@ -16,12 +20,41 @@ line = "chr11   108692452   108693443   chr2    100986072   100987075       18.9
 # cols = line.split()
 # name = "5M"
 # cig = CIGAR(name)
-# a
+# e = Extend()
 # x = Hit.from_bed(line)
-# print(x.query_start)
+# y = Hit.from_bed(line)
+# xy = list[Hit]()
+# xy.append(x)
+# xy.append(y)
+# xy = merge(xy,e.MERGE_DIST)
+# print(xy[0].query_start)
+# print(len("yes"))
+# ints = [1,0]
+# print(3 %2)
+# x = list[File]()
+# f = open("test.txt","w")
+# x.append(f)
+# print(x[0])
+# x = time()
+# print("hello")
+# y = time()
+# print(y-x)
+# x = dict[str, int]()
+# x.find("h")
+# print("hel")
+# x = [-1]*10
+# # for s in x:
+# #     print(s)
+# print(len(x))
+# x = tuple[int,int](2,5)
+# y = tuple[int,int](2,5)
+print(x < y)
+
+# while(i < len(xy)):
+#     i+=1
 # print(a.span())
-f = open("test.txt","w")
-f.close()
+# f = open("test.txt","w")
+# f.close()
 # # # print(h.query.name)
 
 # a = Alignment("ACGTT","TGCAA", cig)
@@ -36,3 +69,25 @@ f.close()
 # # print(int(alignment.as_int()))
 # a = s'ACGT'
 # print(len(a))
+# x = int(math.sqrt(float(5)))
+# print(x/1000)
+# m = dict[int,int]()
+# if(5 in m):
+
+#     m[5]+=1
+# else:
+#     m[5]=1
+# print(m[5])
+# x = s"ACGTT"
+# y = s"TGCAA"
+# aln = x @ y
+# print(aln.cigar)
+
+# x = dict[str,str]()
+# x["yes"] = "Hello"
+# for i in x.keys():
+#     print(i)
+
+# c = float(int(math.sqrt(float(100-65)*float(33-6))))
+# c = c/1000
+# print(c)

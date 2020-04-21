@@ -5,3 +5,5 @@ class FastaReference:
             self.index[i.name] = i.seq
     def get_sequence(self:FastaReference, key:str):
         return self.index[key]
+    def get_sequence_slice(self:FastaReference, key:str, start:int, end:int):
+        return (self.index[key])[start:end]
