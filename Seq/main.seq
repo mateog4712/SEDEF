@@ -3,7 +3,6 @@ import getopt
 from align_main import *
 from search_main import *
 
-
 opts,args = getopt.getopt(sys.argv[1:], "n:k:r:")
 # print(opts)
 # print(args)

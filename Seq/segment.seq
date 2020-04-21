@@ -1,0 +1,21 @@
+from align import *
+
+
+
+class SegmentTree:
+    MINS: int
+    def __init__(self: SegmentTree, T):
+        self.MINS = 0
+    # Mins: int
+
+    # def __init__(T: int):
+    #     self.Mins = 0
+
+    def deactivate(self: SegmentTree, q):
+        print("hello")
+
+    def rmq(self: SegmentTree, p, q):
+        print("no")
+    
+    def activate(self: SegmentTree, q, score: int):
+        print("yes")

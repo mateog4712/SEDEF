@@ -134,7 +134,6 @@ class Stats:
         MIN_ASSEMBLY_GAP_SIZE = 100
         BIG_OVERLAP_THRESHOLD = 100
 
-
 class Internal:
     DoUppercase: bool
     DoUppercaseSeeds: bool
