@@ -47,7 +47,9 @@ class Sequence:
 def get_minimizers(s:seq,kmer_size, window_size, separate_lowercase):
     hash1 = Hash()
     hold = int((2 * len(s)) / window_size)
-    minimizers = list[Minimizer](hold)
+    minimizers = list[Minimizer]()#reserve
+    # print len(minimizers)
+    # print hold
     window = list[Minimizer]()
     MASK = (1 << (2 * kmer_size)) - 1
     h = 0
@@ -55,28 +57,30 @@ def get_minimizers(s:seq,kmer_size, window_size, separate_lowercase):
     last_u = last_n
     for i in range(0,len(s)):
         if (s[i]== s'N'):#.upper() -> I assume that there is no lowercase letter N
-
             last_n = i
         elif (str(s[i]).isupper()):
             last_u = i
         h = ((h << 2) | hash_dna(s[i])) & MASK
         if (i < kmer_size - 1):
             continue
+        
         hh = Hash(h,  hash1.statuses.index("HAS_N") if  last_n >= (i - kmer_size + 1)     else    (hash1.statuses.index("HAS_UPPERCASE")      if last_u >= (i - kmer_size + 1)  else hash1.statuses.index("ALL_LOWERCASE") ) )
         if(not separate_lowercase and hh.status == hash1.statuses.index("ALL_LOWERCASE")):
             hh.status = hash1.statuses.index("HAS_UPPERCASE")
-        while (window and not (window[-1].hash < hh)):
+        while (len(window) > 0 and not (window[-1].hash < hh)):
             window.pop()
         # check this 
-        while (window and window[-1].loc < (i - kmer_size + 1) - window_size):
-            window.pop()
+        
+        while (len(window)>0 and window[-1].loc < (i - kmer_size + 1) - window_size):
+            window.pop(0)
         
         window.append(Minimizer(hh, i - kmer_size + 1))
 
         if (i - kmer_size + 1 < window_size):
             continue
-        if (minimizers or not (window[0] == minimizers[-1])):
+        if ((len(minimizers) == 0) or not (window[0] == minimizers[-1])):
             minimizers.append(window[0])
+        
     
     return minimizers
 
@@ -103,20 +107,26 @@ class Index:
         self.seq = seq
         self.kmer_size = kmer_size
         self.window_size = window_size
-
+        self.index = dict[int, list[int]]()
         assert(kmer_size <= 16)
-        minimizers = get_minimizers(seq.seq, kmer_size, window_size, separate_lowercase)
-
-        for i in minimizers:
-            # print "ok"
+        self.minimizers = get_minimizers(seq.seq, kmer_size, window_size, separate_lowercase)
+        
+        for i in self.minimizers:
             l = self.index.setdefault(i.hash.hash,list[int]())
             l.append(i.loc)
+        
         h = HashGlobal()
-        ignore = (len(minimizers) * h.INDEX_CUTOFF) / 100.0
+        ignore = (len(self.minimizers) * h.INDEX_CUTOFF) / 100.0
         hist = dict[int,int]()
+        
         for i in self.index:
-            hist[i] += 1
+            if not i in hist:
+                hist.setdefault(i,1)
+            else:
+                hist[i] +=1
+        
         sum = 0
+
         self.threshold = 1 << 31
         j = 0
         for i in hist.keys():

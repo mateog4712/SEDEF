@@ -45,76 +45,84 @@ class ITNode:
 
 # def __str__(i: None):
 #     return " "
-def newNode(i: Interval):
-	t = ITNode(i,None, None)
-	return t
+# def newNode(i: Interval):
+# 	t = ITNode(i,None, None)
+# 	return t
 
-def insert(root, i):
-	if not (root):
-		root = ITNode(i)
-		print f'here {root}'
-		return root
-	l = root.i.low
-	if (i.low < l):
-		root.left = insert(root.left,i)
-	else:
-		root.right = insert(root.right,i)
+# def insert(root, i):
+# 	if not (root):
+# 		root = ITNode(i)
+# 		print f'here {root}'
+# 		return root
+# 	l = root.i.low
+# 	if (i.low < l):
+# 		root.left = insert(root.left,i)
+# 	else:
+# 		root.right = insert(root.right,i)
 	
-	if (root.max < i.high):
-		root.max = i.high
-	return root
+# 	if (root.max < i.high):
+# 		root.max = i.high
+# 	return root
 
-def doOverlap(i1: Interval, i2: Interval):
-	if (i1.low<=i2.high and i2.low <= i1.high):
-		return True
-	return False
-def overlapSearch(root: ITNode, i:Interval, l: list[Interval]) -> list[Interval]:
-	# print f'{root}'
-	if not (root):
-		return l
-	if (doOverlap(root.i,i)):
-		l.append(root.i)
-		# return root.i
-	if ((root.left) and root.left.max >= i.low):
-		overlapSearch(root.left, i,l)
-	overlapSearch(root.right, i,l)
-	return l
+# def doOverlap(i1: Interval, i2: Interval):
+# 	if (i1.low<=i2.high and i2.low <= i1.high):
+# 		return True
+# 	return False
+# def overlapSearch(root: ITNode, i:Interval, l: list[Interval]) -> list[Interval]:
+# 	# print f'{root}'
+# 	if not (root):
+# 		return l
+# 	if (doOverlap(root.i,i)):
+# 		l.append(root.i)
+# 		# return root.i
+# 	if ((root.left) and root.left.max >= i.low):
+# 		overlapSearch(root.left, i,l)
+# 	overlapSearch(root.right, i,l)
+# 	return l
 
-def isprintaj(root):
-	k =root
-	s = "Left:"
-	while k:
-		s+= f'{k}\t'
-		k=k.left
-	s += "Right:"
-	k =root.right
-	while k:
-		s+= f'{k}\t'
-		k=k.right
-	return s
-	return s
+# def isprintaj(root):
+# 	k =root
+# 	s = "Left:"
+# 	while k:
+# 		s+= f'{k}\t'
+# 		k=k.left
+# 	s += "Right:"
+# 	k =root.right
+# 	while k:
+# 		s+= f'{k}\t'
+# 		k=k.right
+# 	return s
+# 	return s
 
 
 
 
 class Tree:
 	root: ITNode
+	rootRef: ITNode
+	pairs: set[tuple[Interval,Interval] ]
 	def __init__(self: Tree):
 		self.root = None
+		self.rootRef = None
+		pairs = set[tuple[Interval,Interval] ]()
 	def newNode(self: Tree, i: Interval):
 		t = ITNode(i)
 		return t
-	def insert1(self: Tree, i: Interval):
+	def insert1(self: Tree, i: Interval, i_ref: Interval):
+		self.insert(self.rootRef,i_ref)
 		self.insert(self.root,i)
+		self.pairs.add((i,i_ref))
 	def insert(self: Tree,root:ITNode, i: Interval):
 		print f'ok'
 		if (not self.root):
 			self.root = self.newNode(i)
-			print self.root
+			return root
+		if (not self.rootRef):
+			self.root = self.newNode(i)
 			return root
 		if (not root):
 			root = self.newNode(i)
-			print root
+			# print root
 			return root
 		l = root.i.low
 		if (i.low < l):
@@ -129,18 +137,44 @@ class Tree:
 		if (i1.low<=i2.high and i2.low <= i1.high):
 			return True
 		return False
-	def overlapSearch1(self:Tree ,i:Interval,l:list[Interval]) -> list[Interval]:
-		m = self.overlapSearch(self.root, i,l)
+	def doOverlapOne(self:Tree,i2: Interval,i1: int):
+		if (i1<=i2.high and i1 <= i2.low):
+			return True
+		return False
+	def overlapSearch1(self:Tree ,i:Interval,l:list[Interval],is_root: bool) -> list[Interval]:
+		m=list[Interval]()
+		if (is_root):
+			m = self.overlapSearch(self.rootRef, i,l)
+		else:
+			m = self.overlapSearch(self.root, i,l)
 		return m
 	def overlapSearch(self:Tree,root: ITNode, i:Interval,l:list[Interval]):
 		if not (root):
 			return l
-		if (doOverlap(root.i,i)):
+		if (self.doOverlap(root.i,i)):
 			l.append(root.i)
 			# return root.i
 		if ((root.left) and root.left.max >= i.low):
-			overlapSearch(root.left, i,l)
-		overlapSearch(root.right, i,l)
+			self.overlapSearch(root.left, i,l)
+		self.overlapSearch(root.right, i,l)
+		return l
+	def find(self:Tree ,i:int,is_ref: bool) -> list[Interval]:
+		l = list[Interval]()
+		m=list[Interval]()
+		if (is_ref):
+			m = self.overlapSearch(self.rootRef, i,l)
+		else:
+			m = self.overlapSearch(self.root, i,l)
+		return m
+	def find1(self:Tree,root: ITNode, i:int,l:list[Interval]):
+		if not (root):
+			return l
+		if (self.doOverlapOne(root.i,i)):
+			l.append(root.i)
+			# return root.i
+		if ((root.left) and root.left.max >= i.low):
+			self.find1(root.left, i,l)
+		self.find1(root.right, i,l)
 		return l
 	def __str__(self:Tree):
 		k =self.root
@@ -153,7 +187,6 @@ class Tree:
 		while k:
 			s+= f'{k}\t'
 			k=k.right
-		return s
 		return s
 		
 

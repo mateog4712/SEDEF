@@ -50,15 +50,20 @@ def help1(h):
 
 def search_single(ref_path, query_chr,ref_chr,  is_ref_complement,  kmer_size,  window_size,s):
     is_same_genome = (ref_chr == query_chr) and not is_ref_complement
+    
     fr = FastaReference(ref_path)
-
+    
     ref = fr.get_sequence(ref_chr)
-    ref_hash = Index(Sequence(ref_chr, ref, is_ref_complement), kmer_size, window_size,True)
+    s_ref = Sequence(ref_chr, ref, is_ref_complement)
+    
+    ref_hash = Index(s_ref, kmer_size, window_size,True)
+    
     query_hash = Index(ref_hash)
     
     if (not is_same_genome):
         query = fr.get_sequence(query_chr)
         query_hash = Index(Sequence(query_chr, query,False), kmer_size, window_size, True)
+    
     total = initial_search(query_hash, ref_hash, is_same_genome,s)
     #help1
     # total = 0
@@ -67,8 +72,6 @@ def search_single(ref_path, query_chr,ref_chr,  is_ref_complement,  kmer_size,  
 
 
 def search_main(opts,args):
-    print f'{args}'
-    print f'{opts}'
     s = Search()
     is_complement  = False
     if (len(args)>0):
