@@ -1,8 +1,12 @@
 from common import *
 from globals import *
 import math
-def rc(s: seq):
+MY_LIB = "util_c.so" 
+from MY_LIB cimport fun1(a: int) -> int
+from MY_LIB cimport solve_inverse_jaccard_c(a: int, b: int, c:int, d:int) -> float
+from MY_LIB cimport relaxed_jaccard_estimate_c(a: int, b: int, c:int, d:int) -> float
 
+def rc(s: seq):
     return ~s
 # from scipy import optimize
 def tau( edit_error,  kmer_size):
@@ -14,20 +18,8 @@ def tau( edit_error,  kmer_size):
     return a * b
 
 def solve_inverse_jaccard( j,  kmer_size):
-    if (j == 0):
-        return 1
-    if (j == 1):
-        return 0
-    return 1.12
-    # return boost::math::tools::newton_raphson_iterate([j, kmer_size](double d){
-    # 	const double ERROR_RATIO = (Globals::Search::MAX_ERROR - Globals::Search::MAX_EDIT_ERROR) / Globals::Search::MAX_EDIT_ERROR;
-    # 	double E = exp(d * kmer_size);
-    # 	return make_tuple(
-    # 		((1 - d * ERROR_RATIO) / (1 + d * ERROR_RATIO)) * (1.0 / (2 * E - 1)) - j,
-    # 		2 * (- kmer_size * E + ERROR_RATIO - 2 * ERROR_RATIO * E + E * kmer_size * pow(d * ERROR_RATIO, 2)) /
-    # 			pow((2 * E - 1) * (1 + d * ERROR_RATIO), 2)
-    # 	);
-    # }, 0.10, 0.0, 1.0, numeric_limits<double>::digits)
+    s_glob = Search()
+    return solve_inverse_jaccard_c(j,  kmer_size, s_glob.MAX_ERROR,s_glob.MAX_EDIT_ERROR)
 
 def relaxed_jaccard_estimate( s:int, kmer_size:int,  mm: dict[int,int]):
     s_glob = Search()
@@ -39,22 +31,7 @@ def relaxed_jaccard_estimate( s:int, kmer_size:int,  mm: dict[int,int]):
         result = it
     if (result != -1):
         return result
-    CI = 0.75
-    Q2 = (1.0 - CI) / 2
-
-    result = math.ceil(s * tau(s_glob.MAX_EDIT_ERROR, kmer_size))
-
-    while(result >= 0):
-        d = solve_inverse_jaccard(result / s, kmer_size)
-        #implement these things!
-        # x = quantile(complement(binomial(s, tau(d, kmer_size)), Q2))
-        x = 1.1
-        low_d = solve_inverse_jaccard(x / s, kmer_size)
-        if (100 * (1 - low_d) < s.MAX_EDIT_ERROR):
-            result+=1
-            break
-        result -=0
-    result = max(result, 0.0)
+    result = relaxed_jaccard_estimate_c( s,  kmer_size,  s_glob.MAX_EDIT_ERROR, s_glob.MAX_ERROR, result)
     mm[s] = result
     return result
     
