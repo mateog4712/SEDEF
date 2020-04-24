@@ -1,0 +1,87 @@
+from hit import *
+from Tree import *
+from hash import *
+from sliding import *
+from globals import*
+from common import *
+
+def do_extend_query_right(winnow: SlidingMap, query_hash: Index, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash: Index,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome)-> bool:
+
+    if (query_winnow_end >= len(query_hash.minimizers)):
+        return False
+    winnow.add_to_query(query_hash.minimizers[query_winnow_end].hash)
+    query_winnow_end+=1
+    query_end = query_hash.minimizers[query_winnow_end].loc if(query_winnow_end < len(query_hash.minimizers)) else len(query_hash.seq.seq)
+    return True
+def undo_extend_query_right (winnow: SlidingMap, query_hash: Index, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash: Index,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome) -> bool:
+    query_winnow_end-=1
+    winnow.remove_from_query(query_hash.minimizers[query_winnow_end].hash)
+    
+    query_end = query_hash.minimizers[query_winnow_end].loc
+def do_extend_ref_right (winnow: SlidingMap, query_hash: Index, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash: Index,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome)-> bool:
+    if (ref_winnow_end >= len(ref_hash.minimizers)):
+        return False
+    winnow.add_to_reference(ref_hash.minimizers[ref_winnow_end].hash)
+    ref_winnow_end+=1
+    ref_end = ref_hash.minimizers[ref_winnow_end].loc  if ref_winnow_end < len(ref_hash.minimizers) else len(ref_hash.seq.seq)
+    return True
+def undo_extend_ref_right (winnow: SlidingMap, query_hash: Index, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash: Index,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome)-> bool:
+    ref_winnow_end-=1
+    winnow.remove_from_reference(ref_hash.minimizers[ref_winnow_end].hash)
+    ref_end = ref_hash.minimizers[ref_winnow_end].loc
+def do_extend_both_right (winnow: SlidingMap, query_hash: Index, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash: Index,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome)-> bool:
+    if (ref_winnow_end >= len(ref_hash.minimizers) or query_winnow_end >= len(query_hash.minimizers)):
+        return False
+    r = True
+    r = do_extend_query_right(winnow, query_hash, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome)
+    r = r & do_extend_ref_right(winnow, query_hash, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome)
+    return r
+
+def undo_extend_both_right (winnow: SlidingMap, query_hash: Index, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash: Index,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome):
+    undo_extend_ref_right(winnow, query_hash, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome)
+    undo_extend_query_right(winnow, query_hash, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome)
+def do_extend_query_left (winnow: SlidingMap, query_hash: Index, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash: Index,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome):
+    if (not query_winnow_start):
+        return False
+    query_winnow_start-=1
+    winnow.add_to_query(query_hash.minimizers[query_winnow_start].hash)
+    query_start = query_hash.minimizers[query_winnow_start - 1].loc + 1  if  query_winnow_start else 0
+    return True
+def undo_extend_query_left (winnow: SlidingMap, query_hash: Index, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash: Index,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome):
+    query_start = query_hash.minimizers[query_winnow_start].loc + 1
+    winnow.remove_from_query(query_hash.minimizers[query_winnow_start].hash)
+    query_winnow_start+=1
+def do_extend_ref_left (winnow: SlidingMap, query_hash: Index, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash: Index,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome):
+    if (not ref_winnow_start):
+        return False
+    ref_winnow_start-=1
+    winnow.add_to_reference(ref_hash.minimizers[ref_winnow_start].hash)
+    ref_start = ref_hash.minimizers[ref_winnow_start - 1].loc + 1 if ref_winnow_start else 0
+    return True
+def undo_extend_ref_left  (winnow: SlidingMap, query_hash: Index, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash: Index,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome):
+    ref_start = ref_hash.minimizers[ref_winnow_start].loc + 1
+    winnow.remove_from_reference(ref_hash.minimizers[ref_winnow_start].hash)
+    ref_winnow_start+=1
+def do_extend_both_left (winnow: SlidingMap, query_hash: Index, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash: Index,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome):
+    if (not query_winnow_start or not ref_winnow_start):
+        return False
+    r = True
+    r = do_extend_query_left(winnow, query_hash, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome)
+    r =  r & do_extend_ref_left(winnow, query_hash, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome)
+
+    return r
+def undo_extend_both_left (winnow: SlidingMap, query_hash: Index, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash: Index,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome):
+    undo_extend_ref_left(winnow, query_hash, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome)
+    undo_extend_query_left(winnow, query_hash, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome)
+def do_extend_both_both (winnow: SlidingMap, query_hash: Index, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash: Index,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome):
+    if (not query_winnow_start or not ref_winnow_start):
+        return False
+    if (ref_winnow_end >= len(ref_hash.minimizers) or query_winnow_end >= len(query_hash.minimizers)):
+        return False
+    r = True
+    r = do_extend_both_left(winnow, query_hash, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome)
+    r = r & do_extend_both_right(winnow, query_hash, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome)
+    return r
+def undo_extend_both_both (winnow: SlidingMap, query_hash: Index, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash: Index,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome):
+    undo_extend_both_right(winnow, query_hash, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome)
+    undo_extend_both_left(winnow, query_hash, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome)

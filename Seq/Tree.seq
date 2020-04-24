@@ -104,7 +104,7 @@ class Tree:
 	def __init__(self: Tree):
 		self.root = None
 		self.rootRef = None
-		pairs = set[tuple[Interval,Interval] ]()
+		self.pairs = set[tuple[Interval,Interval] ]()
 	def newNode(self: Tree, i: Interval):
 		t = ITNode(i)
 		return t
@@ -188,6 +188,8 @@ class Tree:
 			s+= f'{k}\t'
 			k=k.right
 		return s
+	# def __iadd__(self, other):
+
 		
 
 # i=Interval(2,5)

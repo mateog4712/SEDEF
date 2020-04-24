@@ -41,9 +41,10 @@ class AVLNode[K,V]:
             current = current.right
         return current
     def lower_bound(self,i):
-        if(current and current.left and current.key>i)
+        current = self
+        if(current and current.left and current.key>i):
             return current.left.lower_bound(i)
-        if(current and current.right and current.key<i)
+        if(current and current.right and current.key<i):
             return current.right.lower_bound(i)
         return current
 

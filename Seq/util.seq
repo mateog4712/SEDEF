@@ -42,11 +42,13 @@ def relaxed_jaccard_estimate( s:int, kmer_size:int,  mm: dict[int,int]):
     CI = 0.75
     Q2 = (1.0 - CI) / 2
 
-    result = math.ceil(s * tau(Globals::Search::MAX_EDIT_ERROR, kmer_size))
+    result = math.ceil(s * tau(s_glob.MAX_EDIT_ERROR, kmer_size))
 
     while(result >= 0):
         d = solve_inverse_jaccard(result / s, kmer_size)
-        x = quantile(complement(binomial(s, tau(d, kmer_size)), Q2))
+        #implement these things!
+        # x = quantile(complement(binomial(s, tau(d, kmer_size)), Q2))
+        x = 1.1
         low_d = solve_inverse_jaccard(x / s, kmer_size)
         if (100 * (1 - low_d) < s.MAX_EDIT_ERROR):
             result+=1
