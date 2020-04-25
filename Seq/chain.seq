@@ -1,9 +1,8 @@
-from hit import *
+from align_hit import *
 from common import *
 from segment import *
 from refine import *
 from search import *
-from align import *
 from time import *
 from globals import *
 
