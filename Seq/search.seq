@@ -1,4 +1,4 @@
-from hit import *
+from align_hit import *
 from Tree import *
 from hash import *
 from sliding import *

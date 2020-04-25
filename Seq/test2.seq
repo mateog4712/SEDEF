@@ -1,2 +1,3 @@
-f = FASTA('test.fa')
-print f['chr1']
+s = s'AAACC'
+for i in range(0,len(s)):
+    print s[i]

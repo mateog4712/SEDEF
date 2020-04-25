@@ -1,7 +1,7 @@
 from Tree import Tree, Interval
 from globals import *
 from hash import * 
-from hit import *
+from align_hit import *
 from search import *
 from fasta import *
 
