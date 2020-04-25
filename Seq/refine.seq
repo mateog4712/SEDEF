@@ -1,9 +1,8 @@
 from common import *
-from align import *
 from search import *
 from segment import *
 # from chain import *
-from hit import *
+from align_hit import *
 
 
 def refine_chains(anchors: list[Hit], qseq: str, rseq: str, orig: Hit):
