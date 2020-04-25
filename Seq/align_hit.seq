@@ -29,9 +29,9 @@ class Anchor:
 	q: int
 	r: int
 	l: int
-	has_u: int
+	has_u: bool
 
-	def __init__(self: Anchor, q: int, r:int, l: int, has_u: int):
+	def __init__(self: Anchor, q: int, r:int, l: int, has_u: bool):
 		self.q = q
 		self.r = r
 		self.l = l
@@ -574,10 +574,10 @@ class Alignment:
 		return self.error.gaps
 
 	def gap_error(self: Alignment):
-		return pct(self.error.gap_bases, self.error.matches+self.error.gap_bases+self.error.mismatches)
+		return pct(float(self.error.gap_bases), float(self.error.matches+self.error.gap_bases+self.error.mismatches))
 
 	def mismatch_error(self: Alignment):
-		return pct(self.error.mismatches, self.error.matches+self.error.gap_bases+self.error.mismatches)
+		return pct(float(self.error.mismatches), float(self.error.matches+self.error.gap_bases+self.error.mismatches))
 
 	def total_error(self: Alignment):
 		return self.mismatch_error() + self.gap_error()
@@ -737,7 +737,7 @@ class Hit:
             bed = bed + "\t" + ""
         
         if(self.aln.span()):
-            bed = bed + "\t" + "m=" + str(self.aln.mismatch_error()) + ";g=" + str(self.gap_error())
+            bed = bed + "\t" + "m=" + str(self.aln.mismatch_error()) + ";g=" + str(self.aln.gap_error())
         else:
             bed = bed + "\t" + ""
         
@@ -898,13 +898,3 @@ def process(hs: Hit, cigar: CIGAR):
 
 def trimlower(h: Hit):
 	print("no")
-
-
-line = "chr11   108692452   108693443   chr2    100986072   100987075       18.9    +   +   1003    1024    104M1I126M2D114M10I85M4I29M15I26M1I103M4D22M15D301M2I60M    m=13.7;g=5.3"
-name = "5M"
-cig = CIGAR(name)
-e = Extend()
-x = Hit.from_bed(line)
-y = Hit.from_bed(line)
-y.aln = Alignment()
-print(y.aln.span())
