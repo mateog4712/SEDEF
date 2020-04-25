@@ -272,7 +272,7 @@ def align_main(opts,args):
         if nbins == -1:
             print("Must provide number of bins (--bins)")
             sys.exit(0)	
-        bucket_alignments_extern("chr22.fa",nbins,"hello",True)#(cmdl[1], nbins, cmdl[2], true);
+        bucket_alignments_extern(args[1],nbins,args[2],True)#(cmdl[1], nbins, cmdl[2], true);
     elif command == "generate":
         kmer_size = -1
         for o,a in opts:

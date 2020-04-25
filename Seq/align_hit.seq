@@ -1,7 +1,8 @@
 from bio import CIGAR
 from common import *
-from hit import *
+#from hit import *
 from globals import *
+from hash import *
 
 
 def ceq(a:str, b:str):
@@ -87,111 +88,7 @@ class Alignment:
 		self.cigar = cigar
 		self.populate_nice_alignment()
 
-	def __init__(self: Alignment, qstr: str, rstr:str, guide: list[Hit], side:int):
-		self.chr_a = qstr
-		prev = guide[0]
-		for index in range(1,len(guide)):
-			prev = guide[index-1]
-			cur = guide[index]
-			qs = cur.query_start
-			qe = cur.query_end
-			qps = prev.query_start 
-			qpe = prev.query_end
-
-			rs = cur.ref_start
-			re = cur.ref_end
-			rps = prev.ref_start
-			rpe = prev.ref_end
-
-			assert(qpe <= qs)
-			assert(rpe <= rs)
-
-			##check this assignment of self
-			self.end_a = qe
-			self.end_b = re
-			self.a+=qstr[qpe:qe]
-			self.b+=rstr[rpe:re]
-
-			qgap = qs  - qpe
-			rgap = rs - rpe
-			if(qgap and rgap):
-				if(qgap <= 1000 and rgap <= 1000):
-					gap = Alignment(qstr[qpe:qgap],rstr[rpe:rgap])
-					self.append_cigar(gap.cigar)
-				else:
-					ma = max(qgap,rgap)
-					mi = min(qgap,rgap)
-					ma1 = Alignment(qstr[qpe:qpe+mi],rstr[rpe:rpe+mi])
-					if(qgap == mi):
-						ma1.append_cigar(str(ma-mi)+ 'I')
-					else:
-						ma1.append_cigar(str(ma-mi)+ 'D')
-
-					ma2 = Alignment(qstr[qs-mi:qs],rstr[rs-mi:rs])
-					if(qgap == mi):
-						ma1.prepend_cigar(str(ma-mi)+ 'I')
-					else:
-						ma1.prepend_cigar(str(ma-mi)+ 'D')
-
-					if(ma2.total_error()<ma1.total_error()):
-						self.append_cigar(ma2.cigar)
-					else:
-						self.append_cigar(ma1.cigar)
-
-			elif(qgap):
-				self.append_cigar(CIGAR(str(qgap) + 'D'))
-			
-			elif(rgap):
-				self.append_cigar(CIGAR(str(rgap) + 'I'))
-
-			self.append_cigar(cur.aln.cigar)
-
-		qlo = self.start_a
-		qhi = self.end_a
-		rlo= self.start_b
-		rhi = self.end_b
-
-		assert(self.a == qstr[qlo:qhi])
-		assert(self.b == rstr[rlo:rhi])
-		
-		if(side):
-			qlo_n = max(0,qlo-side)
-			rlo_n = max(0,rlo-side)
-			if(qlo-qlo_n and rlo-rlo_n):
-				gap = Alignment(qstr[qlo_n:qlo],rstr[rlo_n:rlo])
-				gap.trim_front()
-
-				qlo_n = qlo - (gap.end_a - gap.start_a)
-				rlo_n = rlo - (gap.end_b - gap.start_b)
-				self.prepend_cigar(gap.cigar)
-				self.a = qstr[qlo_n:qlo] + self.a
-				self.b = rstr[rlo_n:rlo] + self.b
-				self.start_a = qlo #qlo = qlo_n
-				self.start_b = rlo #rlo = rlo_n
-
-			qhi_n = min(qhi+side,len(qstr))
-			rhi_n = min(rhi+side,len(rstr))
-
-			if(qhi_n-qhi and rhi_n-rhi):
-				gap = Alignment(qstr[qhi:qhi_n],rstr[rhi:rhi_n])
-				gap.trim_back()
-
-				qhi_n = qhi + gap.end_a
-				rhi_n = rhi + gap.end_b
-				self.append_cigar(gap.cigar)
-				self.a += qstr[qhi:qhi_n]
-				self.b += rstr[rhi:rhi_n]
-				self.end_a = qhi_n #qhi = qhi_n; 
-				self.end_b = rhi_n #rhi = rhi_n;
-
-		assert(qlo >= 0)
-		assert(rlo >= 0)
-		assert(qhi <= len(qstr))
-		assert(rhi <= len(rstr))
-		assert(self.a == qstr[qlo:qhi])
-		assert(self.b == rstr[rlo:rhi])
-
-		self.populate_nice_alignment()
+	
 
 
 
@@ -685,6 +582,300 @@ class Alignment:
 	def total_error(self: Alignment):
 		return self.mismatch_error() + self.gap_error()
 
+class Hit:
+    query: Sequence
+    query_start: int
+    query_end: int
+    ref: Sequence
+    ref_start: int
+    ref_end: int
+    jaccard: int
+    name: str
+    comment: str
+    aln: Alignment
+
+    def __init__(self:Hit):
+        self.name = ""
+
+    def __init__(self:Hit, query: Sequence, query_start: int, query_end: int, ref: Sequence, ref_start: int, ref_end: int, jaccard: int, name: str, comment: str):
+        self.query = query
+        self.query_start = query_start
+        self.query_end = query_end
+        self.ref = ref
+        self.ref_start = ref_start
+        self.ref_end = ref_end
+        self.jaccard = jaccard
+        self.name = name
+        self.comment = ""
+        self.aln = Alignment()
+
+    def __eq__(self: Hit, hit: Hit):
+        if(self.query.name == hit.query.name and self.ref.name == hit.ref.name):
+            return True
+        else:
+            return False
+    def from_bed(bed: str):
+        ss = bed.split()
+        assert(len(ss)>=10)
+        h = Hit(Sequence(ss[0],s"",(ss[8])[0] != '+'),0,0, Sequence(ss[3],s"",(ss[0])[0] != '+'),0,0,0,"","", Alignment())
+        h.query_start = int(ss[1])
+        h.query_end = int(ss[2])
+        h.ref_start = int(ss[4])
+        h.ref_end = int(ss[5])
+        h.name = ss[6]
+        if(len(ss)>=15):
+            h.comment = ss[14]
+        if(len(ss)>=14):
+            h.jaccard = int(ss[13])
+        if(len(ss)>=13):
+            cigar = CIGAR(ss[11])
+        
+        return h
+
+        
+
+    def from_bed2(bed: str,query: Sequence,ref: Sequence):
+        
+        ss = bed.split()
+        assert(len(ss)>=10)
+
+        h = Hit(query,0,0,ref,0,0,0,"","")
+
+        h.query_start = int(ss[1])
+        h.query_end = int(ss[2])
+
+        h.ref_start = int(ss[4])
+        h.ref_end = int(ss[5])
+
+        assert(h.query.is_rc == (ss[8][0] != '+'))
+        assert(h.ref.is_rc == (ss[9][0] != '+'))
+
+        assert(~h.query.is_rc)
+        if(h.ref.is_rc):
+            temp = h.ref_start
+            h.ref_start = h.ref_end
+            h.ref_end = temp
+            seq_len = len(h.ref.seq)
+            h.ref_start = seq_len - h.ref_start + 1
+            h.ref_end = seq_len = h.ref_end + 1
+        
+        h.name = ss[6]
+        if(len(ss)>=14):
+            h.jaccard = int(ss[13])
+        if(len(ss)>=13):
+            
+            print("")# change ending back once good bed string is given
+            #h.aln = Alignment(query.seq,ref.seq,ss[12]))
+
+        return h
+
+    def from_wgac(bed):
+        ss = bed.split()
+        assert(len(ss)>=27)
+        h = Hit(Sequence(ss[0],"",False),0,0, Sequence(ss[6],"",(ss[5])[0] != '+'),0,0,0,"","")
+        h.query_start = ss[1]
+        h.query_end = ss[2]
+        h.ref_start = ss[7]
+        h.ref_end = ss[8]
+        h.name = ss[16]
+        h.comment = "err=.1f"
+        #fmt::format("err={:.1f}", 100 - 100 * atof(ss[26].c_str()))
+        assert(h.ref.is_rc == ((ss[5])[0] != '+'))
+        assert(~h.query.is_rc)
+        
+        return h
+    
+    def to_bed(self: Hit, do_rc = True, with_cigar = True, file = ""):
+        #print(self.aln)
+        assert(~self.query.is_rc)
+        qn = self.query.name
+        rn = self.ref.name
+        
+        qs = 0
+        if(do_rc and self.query.is_rc):
+            qs = len(self.query.seq) - self.query_end + 1
+        else:
+            qs = self.query_start
+        qe = 0
+        if(do_rc and self.query.is_rc):
+            qe = len(self.query.seq) - self.query_start + 1
+        else:
+            qe = self.query_end
+
+        rs = 0
+        if(do_rc and self.ref.is_rc):
+            rs = len(self.ref.seq) - self.ref_end + 1
+        else:
+            rs = self.ref_start
+        re = 0
+        if(do_rc and self.ref.is_rc):
+            re = len(self.ref.seq) - self.ref_start + 1
+        else:
+            re = self.ref_end
+
+        bed = qn + "\t" + str(qs) + "\t" + str(qe) + "\t" + rn + "\t" + str(rs) + "\t" + str(re) + "\t" + self.name
+        if(self.aln.span()):
+            bed = bed + "\t" + str(self.aln.total_error())
+        else:
+            bed = bed + "\t" + ""
+        
+        if(self.query.is_rc):
+            bed = bed + "\t" + "-"
+        else:
+            bed = bed + "\t" + "+"
+        
+        if(self.ref.is_rc):
+            bed = bed + "\t" + "-"
+        else:
+            bed = bed + "\t" + "+"
+        
+        bed = bed + "\t" + str(max(self.query_end-self.query_start,self.ref_end-self.ref_start))
+        bed = bed + "\t" + str(self.aln.span())
+        if(with_cigar):
+            bed = bed + "\t" + self.aln.cigar_string()
+        else:
+            bed = bed + "\t" + ""
+        
+        if(self.aln.span()):
+            bed = bed + "\t" + "m=" + str(self.aln.mismatch_error()) + ";g=" + str(self.gap_error())
+        else:
+            bed = bed + "\t" + ""
+        
+        return bed
+
+    
+    def extends(self: Hit, factor: float, max_entend:int):
+        w = max(self.query_end-self.query_start,self.ref_end-self.ref_start)
+        w = min(max_entend,int(w*factor))
+        self.query_start = max(0,self.query_start-w)
+        self.query_end += w
+        self.ref_start = max(0,self.ref_start-w)
+        self.ref_end += w
+    
+    def update_from_alignment(self: Hit):
+        self.query_start = self.aln.start_a
+        self.query_end = self.aln.end_a
+        self.ref_start = self.aln.start_b
+        self.ref_end = self.aln.end_a
+
+def get_position(ar: CIGAR, ppos:int):
+    print('yes')
+
+
+
+
+
+extend Align:
+    def __init__(self: Alignment, qstr: str, rstr:str, guide: list[Hit], side:int):
+		self.chr_a = qstr
+		prev = guide[0]
+		for index in range(1,len(guide)):
+			prev = guide[index-1]
+			cur = guide[index]
+			qs = cur.query_start
+			qe = cur.query_end
+			qps = prev.query_start 
+			qpe = prev.query_end
+
+			rs = cur.ref_start
+			re = cur.ref_end
+			rps = prev.ref_start
+			rpe = prev.ref_end
+
+			assert(qpe <= qs)
+			assert(rpe <= rs)
+
+			##check this assignment of self
+			self.end_a = qe
+			self.end_b = re
+			self.a+=qstr[qpe:qe]
+			self.b+=rstr[rpe:re]
+
+			qgap = qs  - qpe
+			rgap = rs - rpe
+			if(qgap and rgap):
+				if(qgap <= 1000 and rgap <= 1000):
+					gap = Alignment(qstr[qpe:qgap],rstr[rpe:rgap])
+					self.append_cigar(gap.cigar)
+				else:
+					ma = max(qgap,rgap)
+					mi = min(qgap,rgap)
+					ma1 = Alignment(qstr[qpe:qpe+mi],rstr[rpe:rpe+mi])
+					if(qgap == mi):
+						ma1.append_cigar(str(ma-mi)+ 'I')
+					else:
+						ma1.append_cigar(str(ma-mi)+ 'D')
+
+					ma2 = Alignment(qstr[qs-mi:qs],rstr[rs-mi:rs])
+					if(qgap == mi):
+						ma1.prepend_cigar(str(ma-mi)+ 'I')
+					else:
+						ma1.prepend_cigar(str(ma-mi)+ 'D')
+
+					if(ma2.total_error()<ma1.total_error()):
+						self.append_cigar(ma2.cigar)
+					else:
+						self.append_cigar(ma1.cigar)
+
+			elif(qgap):
+				self.append_cigar(CIGAR(str(qgap) + 'D'))
+			
+			elif(rgap):
+				self.append_cigar(CIGAR(str(rgap) + 'I'))
+
+			self.append_cigar(cur.aln.cigar)
+
+		qlo = self.start_a
+		qhi = self.end_a
+		rlo= self.start_b
+		rhi = self.end_b
+
+		assert(self.a == qstr[qlo:qhi])
+		assert(self.b == rstr[rlo:rhi])
+		
+		if(side):
+			qlo_n = max(0,qlo-side)
+			rlo_n = max(0,rlo-side)
+			if(qlo-qlo_n and rlo-rlo_n):
+				gap = Alignment(qstr[qlo_n:qlo],rstr[rlo_n:rlo])
+				gap.trim_front()
+
+				qlo_n = qlo - (gap.end_a - gap.start_a)
+				rlo_n = rlo - (gap.end_b - gap.start_b)
+				self.prepend_cigar(gap.cigar)
+				self.a = qstr[qlo_n:qlo] + self.a
+				self.b = rstr[rlo_n:rlo] + self.b
+				self.start_a = qlo #qlo = qlo_n
+				self.start_b = rlo #rlo = rlo_n
+
+			qhi_n = min(qhi+side,len(qstr))
+			rhi_n = min(rhi+side,len(rstr))
+
+			if(qhi_n-qhi and rhi_n-rhi):
+				gap = Alignment(qstr[qhi:qhi_n],rstr[rhi:rhi_n])
+				gap.trim_back()
+
+				qhi_n = qhi + gap.end_a
+				rhi_n = rhi + gap.end_b
+				self.append_cigar(gap.cigar)
+				self.a += qstr[qhi:qhi_n]
+				self.b += rstr[rhi:rhi_n]
+				self.end_a = qhi_n #qhi = qhi_n; 
+				self.end_b = rhi_n #rhi = rhi_n;
+
+		assert(qlo >= 0)
+		assert(rlo >= 0)
+		assert(qhi <= len(qstr))
+		assert(rhi <= len(rstr))
+		assert(self.a == qstr[qlo:qhi])
+		assert(self.b == rstr[rlo:rhi])
+
+		self.populate_nice_alignment()
+
+
+
+
+
 
 ### Friends
 def update_from_alignment(h: Hit):
@@ -707,3 +898,13 @@ def process(hs: Hit, cigar: CIGAR):
 
 def trimlower(h: Hit):
 	print("no")
+
+
+line = "chr11   108692452   108693443   chr2    100986072   100987075       18.9    +   +   1003    1024    104M1I126M2D114M10I85M4I29M15I26M1I103M4D22M15D301M2I60M    m=13.7;g=5.3"
+name = "5M"
+cig = CIGAR(name)
+e = Extend()
+x = Hit.from_bed(line)
+y = Hit.from_bed(line)
+y.aln = Alignment()
+print(y.aln.span())

@@ -1,5 +1,4 @@
 from hash import *
-import collections
 from bio import CIGAR
 # from align import *
 from globals import *

@@ -1,4 +1,4 @@
-from hit import *
+from align_hit import *
 
 
 def merge(hits: list[Hit], merge_dist: int) -> list[Hit]:
