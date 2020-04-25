@@ -1,4 +1,0 @@
-from common import *
-
-def rc(s):
-    return ~seq(s)

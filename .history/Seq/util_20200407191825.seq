@@ -1,7 +1,0 @@
-from common import *
-
-def rc(s):
-    r=s
-    r=r[::-1]
-    map(r,rev_dna)
-    return r

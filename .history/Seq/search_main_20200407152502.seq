@@ -1,9 +1,0 @@
-TOTAL_ATTEMPTED
-JACCARD_FAILED
-QGRAM_NORMAL_FAILED
-OTHER_FAILED
-INTERVAL_FAILED
-
-
-def search_main(opts,args):
-    print("Hello")

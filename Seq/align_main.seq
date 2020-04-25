@@ -14,8 +14,10 @@ from chain import *
 def bucket_alignments_extern(bed_path,nbins,output_dir, extends):
     files = list[str]()    
     hits = list[Hit]() # vector of hits
-    #map<string, FILE *> tmp_bins;
-	#map<string, int> lens;
+    
+    # append single file from bed path
+    files.append(bed_path + "/hg19.fa")
+	
     tmp_bins = dict[str,str]()
     lens = dict[str,int]()
     ix = 0
