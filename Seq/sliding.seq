@@ -26,10 +26,10 @@ class SlidingMap:
         self.kmer_size=kmer_size
         self.query_size=0
         self.intersection = 0
-        self.limit = 0
+        self.limit = 0.0
         self.storage = AVL[Hash, str]()
-        self.estimate_memoize=  dict[int, int]()
-        self.boundary = self.storage.find_max()
+        self.estimate_memoize =  dict[int, int]()
+        self.boundary =  None # self.storage.find_max()
     
     def jaccard(self:SlidingMap):
         if (self.intersection >= self.limit):
