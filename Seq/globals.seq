@@ -69,7 +69,7 @@ class Align: # Full SD alignment (via KSW)
         # align.cc
         self.MAX_KSW_SEQ_LEN = 60 * KB
 class Extend: # Extension of initial SDs
-    RATIO: int
+    RATIO: float
     MAX_EXTEND: int
     MERGE_DIST: int
     
@@ -78,7 +78,7 @@ class Extend: # Extension of initial SDs
     #		let width = max(query_len, ref_len)
     # 	extend min(MAX_EXTEND, width * EXTEND_RATIO) bases
     def __init__(self: Extend):
-        self.RATIO = 5
+        self.RATIO = 5.0
         self.MAX_EXTEND = 15*KB
         # Max dist of two hits to be merged
         self.MERGE_DIST = 250	
