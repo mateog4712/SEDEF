@@ -1,3 +1,25 @@
-s = s'AAACC'
-for i in range(0,len(s)):
-    print s[i]
+# s = s'AAACC'
+# for i in range(0,len(s)):
+#     print s[i]
+
+from align_hit import *
+from Tree import *
+from hash import *
+from sliding import *
+from globals import*
+from common import *
+# from extendedFunctions import *
+# s = AVL[Hash, str]()
+# h = Hash(2,0)
+# s.insert(h,"hehe")
+
+
+def search1(query_winnow_start: int, query_hash: Index, ref_hash: Index, tree: Tree, same_genome: bool,init_len: int, allow_extend:bool, report_fails:bool) -> list[Hit]:
+    variabl = 14
+
+    internal = Internal()
+    hashG = HashGlobal()
+
+    # m = SlidingMap(variabl)
+
+search1()
