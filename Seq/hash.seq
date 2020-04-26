@@ -22,6 +22,10 @@ class Hash:
         return (h1.status, h1.hash) < (h1.status, h1.hash)
     def __eq__(h1: Hash, h2: Hash):
         return (h1.status, h1.hash) == (h1.status, h1.hash)
+    def __ne__(h1: Hash, h2: Hash):
+        return (h1.status, h1.hash) != (h1.status, h1.hash)
+    def __le__(h1: Hash, h2: Hash):
+        return (h1.status, h1.hash) <= (h1.status, h1.hash)
 
 class Minimizer:
     hash: Hash
@@ -142,17 +146,17 @@ class Index:
     # Find first minimizer at loci p
     def find_minimizers(self:Index,p:int):
         lo = 0
-        hi = self.minimizers.size() - 1
+        hi = len(self.minimizers) - 1
         mid = 0
         while (lo <= hi):
-            mid = lo + (hi - lo) / 2
+            mid = int(lo + (hi - lo) / 2)
             if (self.minimizers[mid].loc >= p and (not mid or self.minimizers[mid - 1].loc < p)):
                 break
             if (self.minimizers[mid].loc < p):
                 lo = mid + 1
             else:
                 hi = mid
-        assert(self.minimizers[mid].loc >= p or mid == self.minimizers.size() - 1); 
+        assert(self.minimizers[mid].loc >= p or mid == len(self.minimizers) - 1); 
         assert(not mid or self.minimizers[mid-1].loc < p)
         if (self.minimizers[mid].loc < p):
             mid+=1 # the last one--- no solution

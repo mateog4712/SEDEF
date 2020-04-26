@@ -36,6 +36,7 @@ def initial_search(query_hash: Index, ref_hash: Index, is_same_genome: bool,s:Se
 
         if (internal.DoUppercaseSeeds and qm.hash.status != Hash.statuses.index("HAS_UPPERCASE")):
             continue
+        
         hits = search(qi, query_hash, ref_hash, tree, is_same_genome,int(Search2.MIN_READ_SIZE), True, False)
         hits = list[Hit]()
         min_len = len(query_hash.seq.seq)

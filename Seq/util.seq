@@ -4,7 +4,7 @@ import math
 MY_LIB = "util_c.so" 
 from MY_LIB cimport fun1(a: int) -> int
 from MY_LIB cimport solve_inverse_jaccard_c(a: int, b: int, c:int, d:int) -> float
-from MY_LIB cimport relaxed_jaccard_estimate_c(a: int, b: int, c:int, d:int) -> float
+from MY_LIB cimport relaxed_jaccard_estimate_c(a: int, b: int, c:int, d:int, e:float) -> float
 
 def rc(s: seq):
     return ~s
@@ -24,14 +24,14 @@ def solve_inverse_jaccard( j,  kmer_size):
 def relaxed_jaccard_estimate( s:int, kmer_size:int,  mm: dict[int,int]):
     s_glob = Search()
     result = -1.0
-    it = None
+    it = -1.0
     if s in mm:
-        it = mm[s]
+        it = float(mm[s])
     if (it):
         result = it
     if (result != -1):
         return result
-    result = relaxed_jaccard_estimate_c( s,  kmer_size,  s_glob.MAX_EDIT_ERROR, s_glob.MAX_ERROR, result)
-    mm[s] = result
+    result = relaxed_jaccard_estimate_c( s,  kmer_size,  int(s_glob.MAX_EDIT_ERROR), int(s_glob.MAX_ERROR), result)
+    mm[s] = int(result)
     return result
     

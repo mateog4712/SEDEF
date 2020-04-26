@@ -5,16 +5,16 @@ QGRAM_NORMAL_FAILED = 0
 OTHER_FAILED = 0
 def min_qgram( l:int,  q:int) -> int:
     s = Search()
-    return l * (1 - (s.MAX_ERROR - s.MAX_EDIT_ERROR) - q * s.MAX_EDIT_ERROR)  - (s.GAP_FREQUENCY * l + 1) * (q - 1)
+    return int(l * (1 - (s.MAX_ERROR - s.MAX_EDIT_ERROR) - q * s.MAX_EDIT_ERROR)  - (s.GAP_FREQUENCY * l + 1) * (q - 1))
 
 def uppercase_filter(q, q_pos,  q_len, r,  r_pos,  r_len) -> tuple[bool,str]:
     q_up = 0
     s = Search()
     for i in range(0,q_len):
-        q_up += (str(q[q_pos + i]).isupper())
+        q_up += int(str(q[q_pos + i]).isupper())
     r_up = 0
     for i in range(0,r_len):
-        r_up += (str(r[r_pos + i]).isupper())
+        r_up += int(str(r[r_pos + i]).isupper())
     if (q_up < s.MIN_UPPERCASE or r_up < s.MIN_UPPERCASE):
         # OTHER_FAILED+=1
         return (False, f'upper ({q_up}, {r_up}) < {s.MIN_UPPERCASE}')

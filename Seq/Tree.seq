@@ -8,6 +8,12 @@ class Interval:
 		if i.low == j.low and i.high == j.high:
 			return True
 		return False
+	def __hash__(self:Interval):
+		return self.low * self.low + self.high * self.high
+	def __ne__(self:Interval,other:Interval):
+		if self.low == other.low and self.high == other.high:
+			return True
+		return False
 
 
 
@@ -102,14 +108,23 @@ class Tree:
 		if ((root.left) and root.left.max >= i.low):
 			self.overlapSearch(root.left, i,l)
 		self.overlapSearch(root.right, i,l)
+	def overlapSearchOne(self:Tree,root: ITNode, i:int,l:list[Interval]):
+		if not (root):
+			return l
+		if (self.doOverlapOne(root.i,i)):
+			l.append(root.i)
+			# return root.i
+		if ((root.left) and root.left.max >= i):
+			self.overlapSearchOne(root.left, i,l)
+		self.overlapSearchOne(root.right, i,l)
 		return l
 	def find(self:Tree ,i:int,is_ref: bool) -> list[Interval]:
 		l = list[Interval]()
 		m=list[Interval]()
 		if (is_ref):
-			m = self.overlapSearch(self.rootRef, i,l)
+			m = self.overlapSearchOne(self.rootRef, i,l)
 		else:
-			m = self.overlapSearch(self.root, i,l)
+			m = self.overlapSearchOne(self.root, i,l)
 		return m
 	def find1(self:Tree,root: ITNode, i:int,l:list[Interval]):
 		if not (root):

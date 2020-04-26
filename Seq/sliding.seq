@@ -11,8 +11,8 @@ def lower_bound(d:  dict[Hash, str],m: Hash):
     return k.sort()
 
 class SlidingMap:
-    storage: AVL[Hash, str]
-    boundary: AVLNode[Hash,str]
+    storage: AVL[Hash, int]
+    boundary: AVLNode[Hash,int]
 
     # typename std::map<Hash, char>::iterator boundary
     query_size: int
@@ -27,17 +27,27 @@ class SlidingMap:
         self.query_size=0
         self.intersection = 0
         self.limit = 0.0
-        self.storage = AVL[Hash, str]()
+        self.storage = AVL[Hash, int]()
         self.estimate_memoize =  dict[int, int]()
-        self.boundary =  None # self.storage.find_max()
+        self.boundary =  self.storage.find_max()
+    
+    def __init__(self:SlidingMap,other: SlidingMap):
+        self.kmer_size=other.kmer_size
+        self.query_size=other.query_size
+        self.intersection = other.intersection
+        self.limit = other.limit
+        self.storage = other.storage
+        self.estimate_memoize =  dict[int, int]()
+
+        self.boundary =  other.boundary # self.storage.find_max()
     
     def jaccard(self:SlidingMap):
         if (self.intersection >= self.limit):
             return self.intersection
         else:
-            return self.intersection - self.limit
+            return int(self.intersection - self.limit)
     
-    def add(self:SlidingMap, h: Hash, BIT: int, FULL:int):
+    def add(self:SlidingMap, h: Hash, BIT: int, FULL = 3):
         it = self.storage.lower_bound(h)
         inserted = False
         if it and it.key == h:
@@ -49,26 +59,26 @@ class SlidingMap:
             inserted = True
 
         if (self.boundary and self.query_size and it.key < self.boundary.key):
-            self.intersection += (it.value == FULL)
+            self.intersection += int(it.value == FULL)
             if (inserted):
-                self.intersection -= (self.boundary.value == FULL)
+                self.intersection -= int(self.boundary.value == FULL)
                 # assert(boundary != storage.begin()); // |S| >= 1!
                 self.boundary = self.boundary.next_smaller() #should go left?
 
         return True
-    def remove(self:SlidingMap,h:Hash, BIT: int, FULL: int):
+    def remove(self:SlidingMap,h:Hash, BIT: int, FULL = 3):
         it = self.storage.lower_bound(h)
         if (it.key != h or not(it.value & BIT)):
             return False
         if (self.query_size and it.key <= self.boundary.key):
-            self.intersection -= (it.value == FULL)
+            self.intersection -= int(it.value == FULL)
             if (it.value == BIT):
-                self.boundary = self.boundary.next_bigger()
+                self.boundary = self.boundary.next_larger()
                 if (self.boundary):
-                    self.intersection += (self.boundary.value == FULL)
+                    self.intersection += int(self.boundary.value == FULL)
         if (it.value == BIT):
-            assert(it != self.boundary)
-            del self.sorage[it.key]
+            assert(not it is self.boundary)
+            del self.storage[it.key]
         else:
             it.value &= ~BIT
         return True
@@ -76,20 +86,20 @@ class SlidingMap:
         if (not self.add(h, 1)):
             return
         self.query_size+=1
-        self.limit = self.relaxed_jaccard_estimate(self.query_size, self.kmer_size, self.estimate_memoize)
+        self.limit = relaxed_jaccard_estimate(self.query_size, self.kmer_size, self.estimate_memoize)
         if (not self.boundary):
             self.boundary = self.storage.find_min()
         else:
-            self.boundary = self.boundary.next_bigger()
-        self.intersection += (self.boundary.value == 3)
+            self.boundary = self.boundary.next_larger()
+        self.intersection += int(self.boundary.value == 3)
     def remove_from_query(self: SlidingMap,h:Hash):
         if (not self.remove(h, 1)):
             return
-        self.query_size_=1
+        self.query_size=1
         self.limit = relaxed_jaccard_estimate(self.query_size, self.kmer_size, self.estimate_memoize)
         if (not self.boundary):
-            self.intersection -= (self.boundary.value == 3)
-        if (self.boundary == self.storage.find_min()):
+            self.intersection -= int(self.boundary.value == 3)
+        if (self.boundary is self.storage.find_min()):
             self.boundary = self.storage.find_max()
         else:
             self.boundary = self.boundary.next_smaller()

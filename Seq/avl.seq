@@ -1,5 +1,5 @@
 import sys
-
+from hash import *
 class AVLNode[K,V]:
     key: K
     value: V
@@ -40,7 +40,7 @@ class AVLNode[K,V]:
         while current.right is not None:
             current = current.right
         return current
-    def lower_bound(self,i):
+    def lower_bound(self,i) -> AVLNode:
         current = self
         if(current and current.left and current.key>i):
             return current.left.lower_bound(i)
@@ -216,7 +216,7 @@ class AVL[K,V]:
         deleted = node  # make sure `deleted` has the right type
         deleted = None
         if node is self.root:
-            pseudoroot = AVLNode[K,V](None, 0, 0)
+            pseudoroot = AVLNode[K,V](None, Hash(), 0) # fixed this
             pseudoroot.left = self.root
             self.root.parent = pseudoroot
             deleted = self.root.delete()

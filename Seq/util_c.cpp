@@ -34,7 +34,7 @@ extern "C" double solve_inverse_jaccard_c(int j, int kmer_size, int MAX_ERROR,in
 }
 
 
-extern "C" int relaxed_jaccard_estimate_c(int s, int kmer_size, int MAX_EDIT_ERROR,int MAX_ERROR, double result)
+extern "C" int relaxed_jaccard_estimate_c(int s, int kmer_size, int MAX_EDIT_ERROR, int MAX_ERROR, double result)
 {
 	
 	if (result != -1) return result;

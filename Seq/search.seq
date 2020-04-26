@@ -6,15 +6,16 @@ from globals import*
 from common import *
 from extendedFunctions import *
 from test2 import *
+from filter import *
 # import function
 def is_overlap(tree:Tree,pf_pos,pf_end, pfp_pos,pfp_end) -> bool:
 	assert(pf_pos <= pf_end)
 	assert(pfp_pos <= pfp_end)
-	i1  = set(Interval(pf_pos,pf_end) + Interval(pfp_pos,pfp_end))
+	# i1  = set[Interval](Interval(pf_pos,pf_end), Interval(pfp_pos,pfp_end))
 	# for it in i1:
 	#     sA = 
-	if len(i1) > 0:
-		return True
+	# if len(i1) > 0:
+	# 	return True
 	return False
 
 def parse_hits(hits):
@@ -23,7 +24,7 @@ def parse_hits(hits):
 	for h in hits:
 		add = True
 		for ph in hits:
-			if(h  != ph ):
+			if(not h  is ph ):
 				if (h.ref_start >= ph.ref_start and h.ref_end <= ph.ref_end and h.query_start >= ph.query_start and h.query_end <= ph.query_end):
 					add = False
 					break
@@ -39,10 +40,10 @@ def extend1(winnow: SlidingMap, query_hash: Index, query_start,  query_end,  que
 	assert(ref_end <= len(ref_hash.seq.seq))
 
 	# extensions = list[function()]
-	extensions = list[tuple[function[bool,SlidingMap, Index, int,  int,  int,  int,Index,  int,  int,  int,  int, bool],function[bool,SlidingMap, Index, int,  int,  int,  int,Index,  int,  int,  int,  int, bool] ]]()
-	extensions.append(do_extend_both_both,undo_extend_both_both)
-	extensions.append(do_extend_both_right,undo_extend_both_right)
-	extensions.append(do_extend_both_left,undo_extend_both_left)
+	extensions = list[tuple[function[bool,SlidingMap, Index, int,  int,  int,  int,Index,  int,  int,  int,  int, bool],function[bool,SlidingMap, Index, int,  int,  int,  int,Index,  int,  int,  int,  int, bool] ] ]()
+	extensions.append((do_extend_both_both, undo_extend_both_both))
+	extensions.append((do_extend_both_right, undo_extend_both_right))
+	extensions.append((do_extend_both_left, undo_extend_both_left))
 
 	# first extend to the boundaries:
 	query_start =  query_hash.minimizers[query_winnow_start - 1].loc + 1 if query_winnow_start else 0
@@ -57,11 +58,11 @@ def extend1(winnow: SlidingMap, query_hash: Index, query_start,  query_end,  que
 		max_match = min(s.MAX_SD_SIZE, int((1.0 / MAX_GAP_ERROR + .5) * abs(query_start - ref_start)) if same_genome else s.MAX_SD_SIZE)
 		aln_len = max(query_end - query_start, ref_end - ref_start)
 		seq_len = min(query_end - query_start, ref_end - ref_start)
-		if (aln_len > max_match or pct(seq_len, aln_len) < 100 * (1 - 2 * MAX_GAP_ERROR)):
+		if (aln_len > max_match or pct(float(seq_len), float(aln_len)) < 100 * (1 - 2 * MAX_GAP_ERROR)):
 			break
 		if (same_genome):
 			overlap = query_end - ref_start
-			if (overlap > 0 and pct(overlap, ref_end - ref_start) > 100 * s.MAX_ERROR):
+			if (overlap > 0 and pct(float(overlap), float(ref_end - ref_start)) > 100 * s.MAX_ERROR):
 				break
 		extended = False
 		for fn in extensions:
@@ -74,7 +75,7 @@ def extend1(winnow: SlidingMap, query_hash: Index, query_start,  query_end,  que
 				fn[1](winnow, query_hash, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome)
 		if (not extended):
 			break
-	return Hit(query_hash.seq, query_start, query_end, ref_hash.seq, ref_start, ref_end, winnow.jaccard(), "", "OK", "")
+	return Hit(query_hash.seq, query_start, query_end, ref_hash.seq, ref_start, ref_end, winnow.jaccard(), "", "OK")
 
 
 	
@@ -138,7 +139,7 @@ def search_in_reference_interval( query_start: int, query_winnow_start:int,  que
 			f = filter(query_hash.seq.seq, query_start, query_start + init_len, ref_hash.seq.seq, ref_start, ref_end)
 			if (not f[0]):
 				if (report_fails):
-					hits.push_back(Hit(query_hash.seq, query_start, query_start + init_len, ref_hash.seq, ref_start, ref_end, 0, "", "" ))
+					hits.append(Hit(query_hash.seq, query_start, query_start + init_len, ref_hash.seq, ref_start, ref_end, 0, "", "" ))
 			else:
 				h = extend1(best_winnow,query_hash, query_start, query_start + init_len, query_winnow_start, query_winnow_end,ref_hash, best_ref_start, best_ref_end, best_ref_winnow_start, best_ref_winnow_end, same_genome)
 				f = filter(query_hash.seq.seq, h.query_start, h.query_end, ref_hash.seq.seq, h.ref_start, h.ref_end)
@@ -147,7 +148,7 @@ def search_in_reference_interval( query_start: int, query_winnow_start:int,  que
 						h.comment = f[1]
 						hits.append(h)
 				else:
-					hits.push_back(h)
+					hits.append(h)
 					a = Interval(h.query_start, h.query_end)
 					b = Interval(h.ref_start, h.ref_end)
 					tree.insert1(a,b)
@@ -156,14 +157,33 @@ def search_in_reference_interval( query_start: int, query_winnow_start:int,  que
 	else:
 		f = filter(query_hash.seq.seq, query_start, query_start + init_len, ref_hash.seq.seq, best_ref_start, best_ref_end)
 		if (f[0] or report_fails):
-			hits.push_back(Hit(query_hash.seq, query_start, query_start + init_len,ref_hash.seq, best_ref_start, best_ref_end, best_winnow.jaccard(), "", ""))
+			hits.append(Hit(query_hash.seq, query_start, query_start + init_len,ref_hash.seq, best_ref_start, best_ref_end, best_winnow.jaccard(), "", ""))
 
 	return hits
 
 
+def getSlidingMap(i:int) -> SlidingMap:
+	return SlidingMap(i)
 
+class pair:
+	first: int
+	second: int
 
-
+	def __init__(self: pair, i: int,j:int):
+		self.first = i
+		self.second = j
+	def __getitem__(self: pair, num: int) -> int:
+		assert(num<3)
+		if num == 0:
+			return self.first
+		else:
+			return self.second
+	def __setitem__(self: pair, num: int, value: int):
+		assert(num<3)
+		if num == 0:
+			self.first = value
+		else:
+			self.second = value
 
 #qi, query_hash, ref_hash, tree, is_same_genome,Search2.MIN_READ_SIZE, True, False)
 
@@ -182,67 +202,68 @@ def search(query_winnow_start: int, query_hash: Index, ref_hash: Index, tree: Tr
 	if (query_start + init_len > len(query_hash.seq.seq)):
 		return l
 	assert(query_hash.kmer_size == ref_hash.kmer_size)
-	search1(query_winnow_start, query_hash, ref_hash, tree, same_genome,init_len, allow_extend, report_fails)
+
+	# search1(query_winnow_start, query_hash, ref_hash, tree, same_genome,init_len, allow_extend, report_fails)
 	# bug in this line of code:
 	# print(query_hash.kmer_size)
-	# nex = SlidingMap(1)
-	# init_winnow=SlidingMap(14)#SlidingMap(query_hash.kmer_size)
-	return l
-	# candidates_prel = set[int]()
-	# query_winnow_end = query_winnow_start
+	# nex =  SlidingMap(query_hash.kmer_size)
+	init_winnow=SlidingMap(14)#SlidingMap(query_hash.kmer_size)
 	
-	# while( query_winnow_end < len(query_hash.minimizers) and query_hash.minimizers[query_winnow_end].loc - query_start <= init_len):
-	# 	h = query_hash.minimizers[query_winnow_end].hash
-	# 	init_winnow.add_to_query(h)
-	# 	if (internal.DoUppercaseSeeds and h.status != hashG.statuses.index("HAS_UPPERCASE")):
-	# 		continue
-	# 	# here check corresponding ref intervals !!!
-	# 	pf = tree.find(query_hash.minimizers[query_winnow_end].loc, False)
-	# 	ptr = None
-	# 	if h in ref_hash.index:
-	# 		ptr = ref_hash.index[h]
-	# 	if (not ptr or len(ptr) >= ref_hash.threshold):
-	# 		continue
-	# 	else:
-	# 		for pos in ptr:
-	# 			if (not same_genome or pos >= query_start + init_len):
-	# 				if (len(pf) > 0 or len(tree.find(pos,True) ) > 0 ):
-	# 					# need to check if 2 intervals correspond to one sequence (ref and query)
-	# 					candidates_prel.insert(pos)
-	# 	query_winnow_end+=1
+	candidates_prel = set[int]()
+	query_winnow_end = query_winnow_start
+	
+	while( query_winnow_end < len(query_hash.minimizers) and query_hash.minimizers[query_winnow_end].loc - query_start <= init_len):
+		h = query_hash.minimizers[query_winnow_end].hash
+		init_winnow.add_to_query(h)
+		if (internal.DoUppercaseSeeds and h.status != h.statuses.index("HAS_UPPERCASE")):
+			continue
+		# here check corresponding ref intervals !!!
+		pf = tree.find(query_hash.minimizers[query_winnow_end].loc, False)
+		ptr = list[int]()
+		if h.hash in ref_hash.index:
+			ptr = ref_hash.index[h.hash]
+		if (not ptr or len(ptr) >= ref_hash.threshold):
+			continue
+		else:
+			for pos in ptr:
+				if (not same_genome or pos >= query_start + init_len):
+					if (len(pf) > 0 or len(tree.find(pos,True) ) > 0 ):
+						# need to check if 2 intervals correspond to one sequence (ref and query)
+						candidates_prel.add(pos)
+		query_winnow_end+=1
 	
 
-	# if ( not init_winnow.query_size):
-	# 	return  list[Hit]()
-	# T = list[tuple[int,int]]()
-	# candidates = list[int]()
-	# for i in candidates_prel:
-	# 	candidates.append(i)
-	# i = 0
-	# while (i <= len(candidates) - init_winnow.limit):
-	# 	j = i + (init_winnow.limit - 1)
-	# 	if (candidates[j] - candidates[i] <= init_len):
-	# 		x = max(0, candidates[j] - init_len + 1)
-	# 		y = candidates[i] + 1
-	# 		if (len(T) and x < T[-1][1]):
-	# 			T[-1][1] = max(T[-1][1], y)
-	# 		else:
-	# 			T.append({x, y})
+	if ( not init_winnow.query_size):
+		return  list[Hit]()
+	T = list[pair]()
+	candidates = list[int]()
+	for i in candidates_prel:
+		candidates.append(i)
+	i = 0
+	while (i <= len(candidates) - init_winnow.limit):
+		j = int(i + (init_winnow.limit - 1))
+		if (candidates[j] - candidates[i] <= init_len):
+			x = max(0, candidates[j] - init_len + 1)
+			y = candidates[i] + 1
+			if (len(T) and x < T[-1][1]):
+				T[-1][1] = max(T[-1][1], y)
+			else:
+				T.append(pair(x, y))
 			
 		
-	# 	i+=1
-	# hits = list[Hit]()
+		i+=1
+	hits = list[Hit]()
 	
-	# for t in T:
-	# 	if (same_genome):
-	# 		t[0] = max(t[0], query_start + init_len)
-	# 	if (t[0] > t[1]):
-	# 		continue
-	# 	h = search_in_reference_interval(query_start, query_winnow_start, query_winnow_end,query_hash, ref_hash, tree, same_genome, init_len,allow_extend, report_fails, init_winnow, t[0], t[1])
-	# 	h = list[Hit]()
-	# 	for hh in h:
-	# 		hits.push_back(hh)
-	# # remove the interval from tree!
-	# # tree -= Interval(0, query_start - Globals::Search::MIN_READ_SIZE)
-	# return parse_hits(hits)
+	for t in T:
+		if (same_genome):
+			t[0] = max(t[0], query_start + init_len)
+		if (t[0] > t[1]):
+			continue
+		h = search_in_reference_interval(query_start, query_winnow_start, query_winnow_end,query_hash, ref_hash, tree, same_genome, init_len,allow_extend, report_fails, init_winnow, t[0], t[1])
+		h = list[Hit]()
+		for hh in h:
+			hits.append(hh)
+	# remove the interval from tree!
+	# tree -= Interval(0, query_start - Globals::Search::MIN_READ_SIZE)
+	return parse_hits(hits)
 	

@@ -20,6 +20,16 @@ def search1(query_winnow_start: int, query_hash: Index, ref_hash: Index, tree: T
     internal = Internal()
     hashG = HashGlobal()
 
+    # m = SlidingMap(variabl)
+
+def funkc2(k: int):
+    variabl = 14
+
+    internal = Internal()
+    hashG = HashGlobal()
+
     m = SlidingMap(variabl)
+
+funkc2(13)
 
 # search1()
