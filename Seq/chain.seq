@@ -58,9 +58,11 @@ def generate_anchors(query: str, ref: str, orig: Hit, kmer_size: int):
         if(last_n >= (i-kmer_size+1)):
             continue
         
-        if h not in ref_hashes.keys():
+        if h not in ref_hashes:
             continue
+
         it = ref_hashes[h]
+
         if(len(it) >= 1000):
             continue
 
@@ -80,7 +82,7 @@ def generate_anchors(query: str, ref: str, orig: Hit, kmer_size: int):
                     if(query[q+lens].upper() == 'N' or ref[q+lens].upper() == 'N'):
                         assert(lens>=kmer_size)
                         break
-                    if(query[q+lens].upper != ref[r+lens].upper()):
+                    if(query[q+lens].upper() != ref[r+lens].upper()):
                         break
                     lens+=1
                 
@@ -189,7 +191,7 @@ def fast_align(query: str, ref: str, orig:Hit, kmer_size:int):
     T = time()
     c = Chain()
     s = Search()
-    print("-- aligning query " + str(len(query) + " --> ref " + str(len(ref))))
+    print("-- aligning query " + str(len(query))+ " --> ref " + str(len(ref)))
     query_ptr = Sequence("QRY",seq(query), False)
     ref_ptr = Sequence("REF",seq(ref), False)
 
@@ -201,7 +203,7 @@ def fast_align(query: str, ref: str, orig:Hit, kmer_size:int):
     ##2. Run DP on the anchors and collect all different anchors
 
     hits = list[Hit]()
-    guides = list[list[int]]
+    guides = list[list[int]]()
     chains_init = chain_anchors(anchors)
     bounds = chains_init[1]
     chain = chains_init[0]

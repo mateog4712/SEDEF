@@ -686,12 +686,14 @@ class Hit:
         return h
     
     def to_bed(self: Hit, do_rc = True, with_cigar = True, file = ""):
-        #print(self.aln)
+		
+
         assert(~self.query.is_rc)
         qn = self.query.name
         rn = self.ref.name
         
         qs = 0
+		
         if(do_rc and self.query.is_rc):
             qs = len(self.query.seq) - self.query_end + 1
         else:

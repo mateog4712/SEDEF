@@ -2,6 +2,14 @@ from align_hit import *
 import math
 
 
+string = ""
+def toBinary(num):
+        if num >= 1:
+            toBinary(num // 2)
+            global string
+            string += str(num % 2)
+
+
 class Point[T]:
     p: int
     a: int
@@ -15,8 +23,12 @@ class Point[T]:
         self.p = p
         self.a = a
         self.h = Tp
+    def __init__(self: Point, p: int, a: int):
+        self.p = p
+        self.a = a
 
 
+PLOT = [(['']*50)]*2
 
 class SegmentTree[T]:
     MINS: int
@@ -46,8 +58,13 @@ class SegmentTree[T]:
         self.anchors = a
         self.activated = 0
         #sort(self.anchors) 
-        #size = (1 << (32 - len(anchors)-1)) ## leading zeros
-        #tree.resize()
+        global string
+        toBinary(len(self.anchors)-1)
+        size = (1 << (32 - (32-len(string)))) ## leading zeros
+        
+        # shouldn't make T into int
+        self.tree = [Point()]*size
+        
         tree_i = 0
         m = SegmentTree.initialize(0,0,len(self.anchors)-1,tree_i)
         m+=1
@@ -174,7 +191,9 @@ class SegmentTree[T]:
 
 
     def plot(self: SegmentTree):
+        global PLOT
         PLOT = [(['']*50)]*2
+        
         w = 6 *math.pow(2.0,math.ceil(math.log(float(len(self.tree))) / math.log(2.0))-1)
         SegmentTree.plot_priv(w,0,0,0,len(self.anchors),PLOT)
 
@@ -202,7 +221,9 @@ class SegmentTree[T]:
 
 
 
-    def plot_priv(self: SegmentTree, w:int, l:int, i:int, s:int, e:int, PLOT:list[list[str]]):
+    def plot_priv(self: SegmentTree, w:int, l:int, i:int, s:int, e:int, PLOT2:list[list[str]]):
+        global PLOT
+        PLOT2 = PLOT
         if(i >= len(self.tree)):
             return
         
