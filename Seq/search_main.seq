@@ -4,6 +4,7 @@ from hash import *
 from align_hit import *
 from search import *
 from fasta import *
+from time import timing
 
 
 TOTAL_ATTEMPTED=0
@@ -18,6 +19,7 @@ def print_function(h: Hit):
 # int initial_search(shared_ptr<Index> query_hash, shared_ptr<Index> ref_hash, bool is_same_genome, 
 # 	T print_function, bool show_progress=true)
 def initial_search(query_hash: Index, ref_hash: Index, is_same_genome: bool,s:Search):# print_function:function[void, Hit] ):
+    print "Initial search"
     tree = Tree()
     total = 0
     track = 0
@@ -26,26 +28,33 @@ def initial_search(query_hash: Index, ref_hash: Index, is_same_genome: bool,s:Se
 
     Search2 =  s
 
+    brojac1 = 0
+    brojac2=0
+
     internal = Internal()
     Hash = Hash()
-
+    
     for qi in range(0,len(query_hash.minimizers)):
+        
         qm = query_hash.minimizers[qi]
         if (qm.loc < next_to_attain):
+            brojac1+=1
             continue
 
         if (internal.DoUppercaseSeeds and qm.hash.status != Hash.statuses.index("HAS_UPPERCASE")):
+            brojac2+=1
             continue
         
-        hits = search(qi, query_hash, ref_hash, tree, is_same_genome,int(Search2.MIN_READ_SIZE), True, False)
-        hits = list[Hit]()
+        hits = search(qi, query_hash, ref_hash, tree, is_same_genome,int(Search2.MIN_READ_SIZE), True, False,s)
+        
         min_len = len(query_hash.seq.seq)
         for pp in hits:
             min_len = min(min_len, pp.query_end - pp.query_start)
             print_function(pp)
         total += len(hits)
 
-        # next_to_attain = ( qm.loc + (Search2.MIN_READ_SIZE * Search2.MAX_ERROR) / 2 if min_len >= Search2.MIN_READ_SIZE else qm.loc)
+        next_to_attain = int(qm.loc + (Search2.MIN_READ_SIZE * Search2.MAX_ERROR) / 2) if min_len >= Search2.MIN_READ_SIZE else qm.loc
+    print f'brojacio: {brojac1}, {brojac2}'
     return total
 
 
@@ -53,23 +62,23 @@ def initial_search(query_hash: Index, ref_hash: Index, is_same_genome: bool,s:Se
 
 def search_single(ref_path: str, query_chr: str,ref_chr:str,  is_ref_complement:bool,  kmer_size: int,  window_size: int,s: Search):
     is_same_genome = (ref_chr == query_chr) and not is_ref_complement
-    
+    print "Search single\n"
     fr = FastaReference(ref_path)
     
     ref = fr.get_sequence(ref_chr)
     s_ref = Sequence(ref_chr, ref, is_ref_complement)
-    
+    # with timing('finding minimizers'):
     ref_hash = Index(s_ref, kmer_size, window_size,True)
-    
+    # print f'built ref index'
     query_hash = Index(ref_hash)
-    
+
     if (not is_same_genome):
         query = fr.get_sequence(query_chr)
         query_hash = Index(Sequence(query_chr, query,False), kmer_size, window_size, True)
-    
+
     total = initial_search(query_hash, ref_hash, is_same_genome,s)
     #help1
-    total = 0
+    # total = 0
     print (f'Total:\t{total}')
     
 
@@ -93,11 +102,11 @@ def search_main(opts,args):
             elif o in ("-g","--gap-freq"):
                 s.GAP_FREQUENCY= float(a)
             elif o in ("-r","reverse"):
-                is_complement = bool(a)
+                is_complement = True
         s.MIN_READ_SIZE = KB * (1 - s.MAX_ERROR)
-        print f'{s}'
-        print f'{args}'
-        print f'{opts}'
+        # print f'{s}'
+        # print f'{args}'
+        # print f'{opts}'
         search_single(args[0], args[1], args[2], is_complement,s.KMER_SIZE, s.WINDOW_SIZE,s)
     else:
         print f'Not enough arguments to search'

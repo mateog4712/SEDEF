@@ -1,5 +1,5 @@
 def hash_dna(c:seq) -> int:
-	return int(c.__int__())#dna_hash_lookup.val[c]
+	return int((c.__int__()))#dna_hash_lookup.val[c]  .__int__()
 
 def align_dna(c):
  	return int(seq(c))#dna_align_lookup.val[c]

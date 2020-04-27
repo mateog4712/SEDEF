@@ -1,6 +1,7 @@
 from hash import *
 from avl import *
 from util import *
+from globals import *
 
 def lower_bound(d:  dict[Hash, str],m: Hash):
     k = list[Hash]()
@@ -21,8 +22,9 @@ class SlidingMap:
     kmer_size:int
 
     estimate_memoize: dict[int, int]
+    searchGlob: Search
 
-    def __init__(self:SlidingMap,kmer_size:int):
+    def __init__(self:SlidingMap,kmer_size:int, s: Search):
         self.kmer_size=kmer_size
         self.query_size=0
         self.intersection = 0
@@ -30,6 +32,7 @@ class SlidingMap:
         self.storage = AVL[Hash, int]()
         self.estimate_memoize =  dict[int, int]()
         self.boundary =  self.storage.find_max()
+        self.searchGlob = s
     
     def __init__(self:SlidingMap,other: SlidingMap):
         self.kmer_size=other.kmer_size
@@ -40,6 +43,7 @@ class SlidingMap:
         self.estimate_memoize =  dict[int, int]()
 
         self.boundary =  other.boundary # self.storage.find_max()
+        self.searchGlob = other.searchGlob
     
     def jaccard(self:SlidingMap):
         if (self.intersection >= self.limit):
@@ -47,7 +51,8 @@ class SlidingMap:
         else:
             return int(self.intersection - self.limit)
     
-    def add(self:SlidingMap, h: Hash, BIT: int, FULL = 3):
+    def add(self:SlidingMap, h: Hash, BIT: int):#, FULL: int):
+        FULL = 3
         it = self.storage.lower_bound(h)
         inserted = False
         if it and it.key == h:
@@ -66,7 +71,8 @@ class SlidingMap:
                 self.boundary = self.boundary.next_smaller() #should go left?
 
         return True
-    def remove(self:SlidingMap,h:Hash, BIT: int, FULL = 3):
+    def remove(self:SlidingMap,h:Hash, BIT: int):#, FULL: int
+        FULL = 3
         it = self.storage.lower_bound(h)
         if (it.key != h or not(it.value & BIT)):
             return False
@@ -86,7 +92,7 @@ class SlidingMap:
         if (not self.add(h, 1)):
             return
         self.query_size+=1
-        self.limit = relaxed_jaccard_estimate(self.query_size, self.kmer_size, self.estimate_memoize)
+        self.limit = float(relaxed_jaccard_estimate(self.query_size, self.kmer_size, self.estimate_memoize,self.searchGlob))
         if (not self.boundary):
             self.boundary = self.storage.find_min()
         else:
@@ -96,7 +102,7 @@ class SlidingMap:
         if (not self.remove(h, 1)):
             return
         self.query_size=1
-        self.limit = relaxed_jaccard_estimate(self.query_size, self.kmer_size, self.estimate_memoize)
+        self.limit = relaxed_jaccard_estimate(self.query_size, self.kmer_size, self.estimate_memoize,self.searchGlob)
         if (not self.boundary):
             self.intersection -= int(self.boundary.value == 3)
         if (self.boundary is self.storage.find_min()):
