@@ -52,9 +52,10 @@ def initial_search(query_hash: Index, ref_hash: Index, is_same_genome: bool,s:Se
             min_len = min(min_len, pp.query_end - pp.query_start)
             print_function(pp)
         total += len(hits)
+        # print total
 
         next_to_attain = int(qm.loc + (Search2.MIN_READ_SIZE * Search2.MAX_ERROR) / 2) if min_len >= Search2.MIN_READ_SIZE else qm.loc
-    print f'brojacio: {brojac1}, {brojac2}'
+    # print f'brojacio: {brojac1}, {brojac2}'
     return total
 
 

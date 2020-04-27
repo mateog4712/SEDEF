@@ -17,15 +17,17 @@ class Hash:
         self.statuses = list[str]()
         self.statuses = ["HAS_UPPERCASE", "ALL_LOWERCASE", "HAS_N"]
     def __gt__(h1: Hash, h2: Hash):
-        return (h1.status, h1.hash) > (h1.status, h1.hash)
+        return (h1.status, h1.hash) > (h2.status, h2.hash)
     def __lt__(h1: Hash, h2: Hash):
-        return (h1.status, h1.hash) < (h1.status, h1.hash)
+        return (h1.status, h1.hash) < (h2.status, h2.hash)
     def __eq__(h1: Hash, h2: Hash):
-        return (h1.status, h1.hash) == (h1.status, h1.hash)
+        # print f'Called {h1.hash} == {h2.hash} and {h1.status} == {h2.status}'
+
+        return h1.status == h2.status and h1.hash==h2.hash
     def __ne__(h1: Hash, h2: Hash):
-        return (h1.status, h1.hash) != (h1.status, h1.hash)
+        return (h1.status, h1.hash) != (h2.status, h2.hash)
     def __le__(h1: Hash, h2: Hash):
-        return (h1.status, h1.hash) <= (h1.status, h1.hash)
+        return (h1.status, h1.hash) <= (h2.status, h2.hash)
 
 class Minimizer:
     hash: Hash
@@ -34,7 +36,7 @@ class Minimizer:
         self.hash = hash
         self.loc = loc
     def __eq__(m1: Minimizer, m2: Minimizer):
-        return (m1.loc,m2.hash) == (m1.loc,m2.hash)
+        return (m1.loc,m1.hash) == (m2.loc,m2.hash)
 class Sequence:
     name: str
     seq: seq
@@ -49,6 +51,7 @@ class Sequence:
         
 
 def get_minimizers(s:seq,kmer_size, window_size, separate_lowercase):
+    
     hash1 = Hash()
     hold = int((2 * len(s)) / window_size)
     minimizers = list[Minimizer]()#reserve
@@ -59,31 +62,35 @@ def get_minimizers(s:seq,kmer_size, window_size, separate_lowercase):
     h = 0
     last_n = - kmer_size - window_size
     last_u = last_n
+    brojac = 0
     for i in range(0,len(s)):
+        
         if (s[i]== s'N'):#.upper() -> I assume that there is no lowercase letter N
             last_n = i
+            # print s[i]
         elif (str(s[i]).isupper()):
             last_u = i
+        # Hash is oke, checked 
         h = ((h << 2) | hash_dna(s[i])) & MASK
         if (i < kmer_size - 1):
             continue
-        
-        hh = Hash(h,  hash1.statuses.index("HAS_N") if  last_n >= (i - kmer_size + 1)     else    (hash1.statuses.index("HAS_UPPERCASE")      if last_u >= (i - kmer_size + 1)  else hash1.statuses.index("ALL_LOWERCASE") ) )
+        # setting hash is ok, checked
+        hh = Hash(h,  hash1.statuses.index("HAS_N") if last_n >= (i - kmer_size + 1) else hash1.statuses.index("HAS_UPPERCASE")  if last_u >= (i - kmer_size + 1)  else hash1.statuses.index("ALL_LOWERCASE")  )
         if(not separate_lowercase and hh.status == hash1.statuses.index("ALL_LOWERCASE")):
             hh.status = hash1.statuses.index("HAS_UPPERCASE")
+
         while (len(window) > 0 and not (window[-1].hash < hh)):
             window.pop()
-        # check this 
-        
         while (len(window)>0 and window[-1].loc < (i - kmer_size + 1) - window_size):
+    
             window.pop(0)
         
         window.append(Minimizer(hh, i - kmer_size + 1))
-
         if (i - kmer_size + 1 < window_size):
             continue
-        if ((len(minimizers) == 0) or not (window[0] == minimizers[-1])):
-            minimizers.append(window[0])
+        if ((len(minimizers) == 0) or ( not window[0] == minimizers[-1])): # (window[0].hash.hash == minimizers[-1].hash.hash and window[0].hash.status == minimizers[-1].hash.status ) )):
+            newHash = Hash(window[0].hash.hash,window[0].hash.status)
+            minimizers.append(Minimizer(newHash, window[0].loc))
         
     
     return minimizers
@@ -113,21 +120,20 @@ class Index:
         self.window_size = window_size
         self.index = dict[int, list[int]]()
         assert(kmer_size <= 16)
-        self.minimizers = get_minimizers(seq.seq, kmer_size, window_size, separate_lowercase)
-        
+        self.minimizers = get_minimizers(self.seq.seq, kmer_size, window_size, separate_lowercase)
+        # print f'Len of minimiozers from hash: {len(self.minimizers)}'
         for i in self.minimizers:
-            l = self.index.setdefault(i.hash.hash,list[int]())
-            l.append(i.loc)
+            self.index.setdefault(i.hash.hash,list[int]()).append(i.loc)
         
         h = HashGlobal()
         ignore = (len(self.minimizers) * h.INDEX_CUTOFF) / 100.0
         hist = dict[int,int]()
         
         for i in self.index:
-            if not i in hist:
-                hist.setdefault(i,1)
+            if not len(self.index[i]) in hist:
+                hist.setdefault(len(self.index[i]),1)
             else:
-                hist[i] +=1
+                hist[len(self.index[i])] +=1
         
         sum = 0
 

@@ -52,6 +52,7 @@ class Tree:
 	root: ITNode
 	rootRef: ITNode
 	pairs: dict[Interval, set[Interval] ]
+
 	def __init__(self: Tree):
 		self.root = None
 		self.rootRef = None
@@ -62,10 +63,6 @@ class Tree:
 	def insert1(self: Tree, i: Interval, i_ref: Interval):
 		self.insert(self.rootRef,i_ref)
 		self.insert(self.root,i)
-		# if i in pairs:
-		# 	self.pairs[i] = set[Interval]()
-		# 	self.pairs[i].add(i_ref)
-		# else:
 		self.pairs.setdefault(i,set[Interval]()).add(i_ref)
 	def insert(self: Tree,root:ITNode, i: Interval):
 		print f'ok'
