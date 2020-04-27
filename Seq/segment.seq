@@ -42,7 +42,7 @@ class SegmentTree[T]:
             return -1
         elif(s+1 == e):
             assert(tree_i < len(self.anchors))
-            self.tree[i] = Point(-1,tree_i,self.anchors[tree_i].x)
+            self.tree[i] = Point[T](-1,tree_i,self.anchors[tree_i].x)
             self.anchors[tree_i].score = 0 # SegmentTree<T>::MIN
             tree_i+=1
             return i
@@ -51,7 +51,7 @@ class SegmentTree[T]:
             a = SegmentTree.initialize(2*i+1,s,bnd,tree_i)
             b = SegmentTree.initialize(2*i+2,bnd,tree_i)
 
-            self.tree[i] = Point(-1,-1, self.tree[2*i+1+(2*i+2<len(self.tree))].h)
+            self.tree[i] = Point[T](-1,-1, self.tree[2*i+1+(2*i+2<len(self.tree))].h)
             return max(a, max(i,b))
 
     def __init__(self: SegmentTree, a: list[T]):

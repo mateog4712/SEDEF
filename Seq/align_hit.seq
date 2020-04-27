@@ -617,7 +617,7 @@ class Hit:
     def from_bed(bed: str):
         ss = bed.split()
         assert(len(ss)>=10)
-        h = Hit(Sequence(ss[0],s"",(ss[8])[0] != '+'),0,0, Sequence(ss[3],s"",(ss[0])[0] != '+'),0,0,0,"","", Alignment())
+        h = Hit(Sequence(ss[0],s"",(ss[7])[0] != '+'),0,0, Sequence(ss[3],s"",(ss[8])[0] != '+'),0,0,0,"","", Alignment())
         h.query_start = int(ss[1])
         h.query_end = int(ss[2])
         h.ref_start = int(ss[4])
