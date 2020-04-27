@@ -61,7 +61,7 @@ def extend1(winnow: SlidingMap, query_hash: Index, query_start,  query_end,  que
 	assert(ref_end <= len(ref_hash.seq.seq))
 
 	# extensions = list[function()]
-	extensions = list[tuple[function[bool,SlidingMap, Index, int,  int,  int,  int,Index,  int,  int,  int,  int, bool],function[bool,SlidingMap, Index, int,  int,  int,  int,Index,  int,  int,  int,  int, bool] ] ]()
+	extensions = list[tuple[function[bool,SlidingMap, Index,Index, bool, list[int]],function[bool,SlidingMap, Index, Index, bool, list[int]] ] ]()
 	extensions.append((do_extend_both_both, undo_extend_both_both))
 	extensions.append((do_extend_both_right, undo_extend_both_right))
 	extensions.append((do_extend_both_left, undo_extend_both_left))
@@ -85,14 +85,24 @@ def extend1(winnow: SlidingMap, query_hash: Index, query_start,  query_end,  que
 			if (overlap > 0 and pct(float(overlap), float(ref_end - ref_start)) > 100 * s.MAX_ERROR):
 				break
 		extended = False
+		list_of_parameters = list[int]()
 		for fn in extensions:
-			if (not fn[0](winnow, query_hash, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome)):
+			list_of_parameters = [query_start,query_end,query_winnow_start,query_winnow_end,ref_start,ref_end,ref_winnow_start,ref_winnow_end]
+			if (not fn[0](winnow, query_hash,ref_hash, same_genome,list_of_parameters)):
 				continue
 			if (winnow.jaccard() >= 0):
 				extended = True
 				break
 			else:
-				fn[1](winnow, query_hash, query_start,  query_end,  query_winnow_start,  query_winnow_end,ref_hash,  ref_start,  ref_end,  ref_winnow_start,  ref_winnow_end, same_genome)
+				fn[1](winnow, query_hash,ref_hash, same_genome,list_of_parameters)
+			query_start = list_of_parameters[0]
+			query_end = list_of_parameters[1]
+			query_winnow_start = list_of_parameters[2]
+			query_winnow_end = list_of_parameters[3]
+			ref_start = list_of_parameters[4]
+			ref_end = list_of_parameters[5]
+			ref_winnow_start = list_of_parameters[6]
+			ref_winnow_end= list_of_parameters[7]
 		if (not extended):
 			break
 	return Hit(query_hash.seq, query_start, query_end, ref_hash.seq, ref_start, ref_end, winnow.jaccard(), "", "OK")

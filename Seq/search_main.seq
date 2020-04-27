@@ -45,14 +45,14 @@ def initial_search(query_hash: Index, ref_hash: Index, is_same_genome: bool,s:Se
             brojac2+=1
             continue
         
-        hits = search(qi, query_hash, ref_hash, tree, is_same_genome,int(Search2.MIN_READ_SIZE), True, False,s)
+        hits = search(qi, query_hash, ref_hash, tree, is_same_genome,int(Search2.MIN_READ_SIZE), True, True,s) # last true is report fails
         
         min_len = len(query_hash.seq.seq)
         for pp in hits:
             min_len = min(min_len, pp.query_end - pp.query_start)
             print_function(pp)
         total += len(hits)
-        # print total
+        print total
 
         next_to_attain = int(qm.loc + (Search2.MIN_READ_SIZE * Search2.MAX_ERROR) / 2) if min_len >= Search2.MIN_READ_SIZE else qm.loc
     # print f'brojacio: {brojac1}, {brojac2}'
