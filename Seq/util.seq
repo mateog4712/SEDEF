@@ -5,7 +5,7 @@ MY_LIB = "util_c.so"
 from MY_LIB cimport fun1(a: int) -> int
 from MY_LIB cimport solve_inverse_jaccard_c(a: int, b: int, c:float, d:float) -> float
 from MY_LIB cimport relaxed_jaccard_estimate_c(a: int, b: int, c:float, d:float, e:float) -> float
-
+from MY_LIB cimport hash_help(h: int, c: int) -> int
 def rc(s: seq):
     return ~s
 # from scipy import optimize

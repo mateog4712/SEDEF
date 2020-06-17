@@ -65,7 +65,7 @@ class Tree:
 		self.insert(self.root,i)
 		self.pairs.setdefault(i,set[Interval]()).add(i_ref)
 	def insert(self: Tree,root:ITNode, i: Interval):
-		print f'ok'
+		# print f'ok'
 		if (not self.root):
 			self.root = self.newNode(i)
 			return root

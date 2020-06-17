@@ -33,6 +33,7 @@ class Search:
     MAX_SD_SIZE: int
 
     def __init__(self: Search):
+        KB = 1000
         self.KMER_SIZE = 12
         self.WINDOW_SIZE = 16 
         self.MIN_UPPERCASE = self.KMER_SIZE
@@ -124,21 +125,21 @@ class Stats:
     # stats_main.cc
     def __init__(self: Stats):
         # Maximal gap size (in percent of the alignment length) that should remain in alignment
-        MAX_OK_GAP = -1 
+        self.MAX_OK_GAP = -1 
         # Minimal size of the SDs after splitting (1KB by default)
-        MIN_SPLIT_SIZE = KB # TODO <-- change to 900
-        MIN_UPPERCASE = 100
-        MAX_SCALED_ERROR = 0.5
+        self.MIN_SPLIT_SIZE = KB # TODO <-- change to 900
+        self.MIN_UPPERCASE = 100
+        self.MAX_SCALED_ERROR = 0.5
 
         # Minimum number of consecutive Ns needed to call assembly gap
-        MIN_ASSEMBLY_GAP_SIZE = 100
-        BIG_OVERLAP_THRESHOLD = 100
+        self.MIN_ASSEMBLY_GAP_SIZE = 100
+        self.BIG_OVERLAP_THRESHOLD = 100
 
 class Internal:
     DoUppercase: bool
     DoUppercaseSeeds: bool
     DoQgram: bool
     def __init__(self: Internal):
-        DoUppercase = True
-        DoUppercaseSeeds = True
-        DoQgram = True
+        self.DoUppercase = True
+        self.DoUppercaseSeeds = True
+        self.DoQgram = True

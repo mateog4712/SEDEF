@@ -22,12 +22,18 @@ class Hash:
         return (h1.status, h1.hash) < (h2.status, h2.hash)
     def __eq__(h1: Hash, h2: Hash):
         # print f'Called {h1.hash} == {h2.hash} and {h1.status} == {h2.status}'
-
         return h1.status == h2.status and h1.hash==h2.hash
+    def __ge__(h1: Hash, h2: Hash):
+        return (h1.status, h1.hash) >= (h2.status, h2.hash)
     def __ne__(h1: Hash, h2: Hash):
         return (h1.status, h1.hash) != (h2.status, h2.hash)
     def __le__(h1: Hash, h2: Hash):
         return (h1.status, h1.hash) <= (h2.status, h2.hash)
+    def __hash__(self: Hash):
+        # return hash(self.hash) ^ hash(self.status)
+        return self.hash.__hash__() ^ self.status.__hash__()
+    def __str__(self:Hash):
+        return f'{self.hash}, {self.status}'
 
 class Minimizer:
     hash: Hash
@@ -65,27 +71,35 @@ def get_minimizers(s:seq,kmer_size, window_size, separate_lowercase):
     brojac = 0
     for i in range(0,len(s)):
         
-        if (s[i]== s'N'):#.upper() -> I assume that there is no lowercase letter N
+        if (s[i]== s'N' or s[i]== s'n'):#.upper() -> I assume that there is no lowercase letter N
             last_n = i
             # print s[i]
         elif (str(s[i]).isupper()):
             last_u = i
         # Hash is oke, checked 
-        h = ((h << 2) | hash_dna(s[i])) & MASK
+        temp_h = 0 if hash_dna(s[i]) == 4 else hash_dna(s[i])
+        h = ((h << 2) | temp_h) & MASK
+        # print(f'Minimizers: {last_n}, {h}, {hash_dna(s[i])}, {s[i]}')
         if (i < kmer_size - 1):
             continue
         # setting hash is ok, checked
-        hh = Hash(h,  hash1.statuses.index("HAS_N") if last_n >= (i - kmer_size + 1) else hash1.statuses.index("HAS_UPPERCASE")  if last_u >= (i - kmer_size + 1)  else hash1.statuses.index("ALL_LOWERCASE")  )
-        if(not separate_lowercase and hh.status == hash1.statuses.index("ALL_LOWERCASE")):
-            hh.status = hash1.statuses.index("HAS_UPPERCASE")
+        # hash1.statuses.index("HAS_N")   ->        2
+        # hash1.statuses.index("HAS_UPPERCASE") ->  0
+        # hash1.statuses.index("ALL_LOWERCASE") ->  1
+        hh = Hash( h,  2 if last_n >= (i - kmer_size + 1) else (0 if last_u >= (i - kmer_size + 1)  else 1)  )
+        # oke minimizers
+        # print(f'{hh}, {last_n}, {(i - kmer_size + 1)}')
+        if(not separate_lowercase and hh.status == 1):
+            hh.status = 0
 
         while (len(window) > 0 and not (window[-1].hash < hh)):
             window.pop()
-        while (len(window)>0 and window[-1].loc < (i - kmer_size + 1) - window_size):
+        while (len(window)>0 and window[-1].loc < ((i - kmer_size + 1) - window_size)):
     
             window.pop(0)
         
         window.append(Minimizer(hh, i - kmer_size + 1))
+
         if (i - kmer_size + 1 < window_size):
             continue
         if ((len(minimizers) == 0) or ( not window[0] == minimizers[-1])): # (window[0].hash.hash == minimizers[-1].hash.hash and window[0].hash.status == minimizers[-1].hash.status ) )):
@@ -95,6 +109,7 @@ def get_minimizers(s:seq,kmer_size, window_size, separate_lowercase):
     
     return minimizers
 
+
 class Index:
     kmer_size: int 
     window_size: int
@@ -103,7 +118,7 @@ class Index:
     seq: Sequence
 
     minimizers: list[Minimizer]
-    index: dict[int, list[int]]
+    index: dict[Hash, list[int]]
 
     def __init__(self:Index,i2:Index):
         self.kmer_size = i2.kmer_size
@@ -118,34 +133,59 @@ class Index:
         self.seq = seq
         self.kmer_size = kmer_size
         self.window_size = window_size
-        self.index = dict[int, list[int]]()
+        self.index = dict[Hash, list[int]]()
+
         assert(kmer_size <= 16)
         self.minimizers = get_minimizers(self.seq.seq, kmer_size, window_size, separate_lowercase)
         # print f'Len of minimiozers from hash: {len(self.minimizers)}'
+        count_collisions = 0
         for i in self.minimizers:
-            self.index.setdefault(i.hash.hash,list[int]()).append(i.loc)
-        
+            # temp = hash_help(i.hash.hash,i.hash.status)
+            if i.hash in self.index:
+                count_collisions+=1
+            # print(f'Hash: {i.hash}')
+            # temp_l = set[int]()
+            # temp_l.add(i.loc)
+            # Locations are ok!
+            # print(f"Location: {i.loc}")
+            self.index.setdefault(i.hash, list[int]()).append(i.loc)
+        # Colisions are ok
+        # print(f'Kolizije: {count_collisions}, {len(self.index)}')
         h = HashGlobal()
-        ignore = (len(self.minimizers) * h.INDEX_CUTOFF) / 100.0
+        ignore = int((len(self.minimizers) * h.INDEX_CUTOFF) / 100.0)
+        # duljine = list[int]()
+        # for i in self.index:
+        #     # if len(self.index[i]) > 10:
+        #     #     print(f'Index: {i.__hash__()}, {len(self.index[i])}')
+        #     duljine.append(len(self.index[i]))
+        
+        # for i in sorted(duljine):
+        #     print(f'duljine: {i}')
+        # print(f'Ignore: {ignore}')
         hist = dict[int,int]()
         
         for i in self.index:
             if not len(self.index[i]) in hist:
-                hist.setdefault(len(self.index[i]),1)
+                hist[len(self.index[i])] = 1
             else:
                 hist[len(self.index[i])] +=1
-        
+        # print(f'Hist len: {len(hist)}')
+        # for i in hist:
+        #     print(f'Hist: {i}, {hist[i]}')
         sum = 0
 
         self.threshold = 1 << 31
+        # print(f'Threshold 1: {self.threshold}')
         j = 0
-        for i in hist.keys():
+        for i in sorted(hist.keys(),reverse = True):
             sum += hist[i]
+            # print(f'Suma: {sum}, {hist[i]}, {i}')
             if sum <= ignore:
-                threshold = i
+                self.threshold = i
             else:
                 break
-        
+            j+=1
+        # print(f'Threshold: {self.threshold}')
 
 
 
@@ -166,4 +206,4 @@ class Index:
         assert(not mid or self.minimizers[mid-1].loc < p)
         if (self.minimizers[mid].loc < p):
             mid+=1 # the last one--- no solution
-	return mid
+        return mid

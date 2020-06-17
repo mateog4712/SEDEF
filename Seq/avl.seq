@@ -1,5 +1,7 @@
 import sys
 from hash import *
+
+
 class AVLNode[K,V]:
     key: K
     value: V
@@ -8,6 +10,7 @@ class AVLNode[K,V]:
     right: AVLNode[K,V]
     height: int
 
+    
     def __init__(self: AVLNode[K,V], parent: AVLNode[K,V], k: K, v: V):
         self.key = k
         self.value = v
@@ -15,8 +18,24 @@ class AVLNode[K,V]:
         self.left = None
         self.right = None
         self.height = -1
+        #None, Hash(), 0
+    def __init__(self: AVLNode[K,V]):
+        self.key = K()
+        self.value = V()
+        self.parent = None
+        self.left = None
+        self.right = None
+        self.height = -1
+    def __eq__(first: AVLNode[K,V], second: AVLNode[K,V]):
+        if not first or not second:
+            return False
+        return first.key == second.key and first.value ==second.value
+    def __ne__(first: AVLNode[K,V], second: AVLNode[K,V]):
+        return not first == second
 
-    def find(self, k) -> AVLNode[K,V]:
+    def find(self, k: K) -> AVLNode[K,V]:
+        if not self:
+            return None
         if k == self.key:
             return self
         elif k < self.key:
@@ -32,40 +51,48 @@ class AVLNode[K,V]:
 
     def find_min(self):
         current = self
-        while current.left is not None:
+        
+        # while current and current.parent:
+        #     current = current.parent
+        while current.left: #is not None
             current = current.left
         return current
     def find_max(self):
         current = self
+        # while current and current.parent:
+        #     current = current.parent
         while current.right is not None:
             current = current.right
         return current
-    def lower_bound(self,i) -> AVLNode:
-        current = self
-        if(current and current.left and current.key>i):
-            return current.left.lower_bound(i)
-        if(current and current.right and current.key<i):
-            return current.right.lower_bound(i)
-        return current
-
-
-    def next_larger(self):
+    
+    def next_larger(self)  -> AVLNode[K,V]:
+        if not self:
+            return None
         if self.right is not None:
             return self.right.find_min()
         current = self
-        while current.parent is not None and current is current.parent.right:
+        while current.parent and current is current.parent.right: #is not None
             current = current.parent
-        return current.parent
-    def next_smaller(self):
+        if current and current.parent and current.parent.key > current.key:
+            return current.parent
+        return None
+    def next_smaller(self) -> AVLNode[K,V]:
+        # print( self)
+        if not self:
+            return None
         if self.left is not None:
+            
             return self.left.find_max()
         current = self
-        while current.parent is not None and current is current.parent.left:
+        while current and current.parent is not None and current is current.parent.left:
             current = current.parent
-        return current.parent
+        if current and current.parent and current.parent.key < current.key:
+            return current.parent
+
+        return None
 
     def insert(self, node):
-        if node is None:
+        if node is None or self is None:
             return
         if node.key < self.key:
             if self.left is None:
@@ -94,6 +121,7 @@ class AVLNode[K,V]:
         else:
             s = self.next_larger()
             self.key, s.key = s.key, self.key
+            self.value, s.value = s.value, self.value
             return s.delete()
 
     def __iter__(self: AVLNode[K,V]) -> AVLNode[K,V]:
@@ -104,12 +132,77 @@ class AVLNode[K,V]:
         if self.right:
             for i in self.right:
                 yield i
+    def __str__(self: AVLNode[K,V]):
+        if self:
+            return f'{str(self.key)}, {str(self.value)}'
+        else:
+            return ""
 
 def height(node):
     if node is None:
         return -1
     else:
         return node.height
+
+def lower_bound[K,V]( i: K, current: AVLNode[K,V], possible: AVLNode[K,V] ) -> AVLNode[K,V]:
+    # first version
+
+    while current:
+        # print(f'C: {current}')
+        if current.key == i:
+            return current
+        elif current.key < i:
+            current = current.right
+        elif current.key > i:
+            possible = current
+            current = current.left
+    return possible
+    
+    
+    
+    # new_node = current.find(i)
+    # # assert(new_node)
+    # if not new_node:
+    #     poc = current.find_min()
+    #     while poc and poc.key < i:
+    #         poc = poc.next_larger()
+    #     if poc and poc.key < i:
+    #         new_node = poc
+    # return new_node
+    
+    # second version:
+
+    # if current and possible and current.key < possible.key and current.key>i:
+    #     possible = current
+
+
+    # if not current and possible:
+    #     return possible
+    # if current and current.key == i:
+    #     return current
+    
+
+    
+    # if current and current.key>i: #and current.left.key > i
+    #     return lower_bound(i,current.left,possible)
+    # if current and current.key<i:
+    #     return lower_bound(i,current.right,possible)
+    # if not current:
+    #     return possible
+    # return current
+
+    #third version:
+    # while current:
+    #     if current and current.key > i:
+    #         possible = current
+    #         current = current.left
+    #     if current and current.key < i:
+    #         current = current.right
+    #     if current and current.key == i:
+    #         return current
+    # return possible
+    # return current
+
 
 def update_height(node):
     node.height = max(height(node.left), height(node.right)) + 1
@@ -120,7 +213,7 @@ class AVL[K,V]:
     def __init__(self: AVL[K,V]):
         self.root = None
 
-    def find(self, k) -> AVLNode[K,V]:
+    def find(self, k: K) -> AVLNode[K,V]:
         if not self.root:
             return None
         return self.root.find(k)
@@ -133,10 +226,17 @@ class AVL[K,V]:
         if not self.root:
             return None
         return self.root.find_max()
-    def lower_bound(self, i) -> AVLNode[K,V]:
-        if not self.root:
-            return None
-        return self.root.find_max().lower_bound(i)
+
+    def lower_bound(self, i: K) -> AVLNode[K,V]:
+        # if not self.root:
+        #     return None
+        # # forth version:
+        # possible = self.root.find_max()
+        # for elem in self:
+        #     if elem.key >= i and elem.key < possible.key:
+        #         possible = elem
+        # return possible if possible.key >= i else None
+        return lower_bound[K, V]( i, self.root, None )
 
     def next_larger(self, k):
         node = self.find(k)
@@ -216,7 +316,7 @@ class AVL[K,V]:
         deleted = node  # make sure `deleted` has the right type
         deleted = None
         if node is self.root:
-            pseudoroot = AVLNode[K,V](None, Hash(), 0) # fixed this
+            pseudoroot = AVLNode[K,V]() # fixed this
             pseudoroot.left = self.root
             self.root.parent = pseudoroot
             deleted = self.root.delete()
@@ -246,7 +346,15 @@ class AVL[K,V]:
     def __iter__(self: AVL[K,V]):
         if self.root:
             for i in self.root:
-                yield i.key, i.value
+                # yield i.key, i.value
+                yield i
+    def __str__(self: AVLNode[K,V]):
+        s="["
+        if self.root:
+            for i in self.root:
+                s+= f'{i},'
+        s+='\n'
+        return s
 
 # d1 = AVL[int,int]()
 # for a in range(5):

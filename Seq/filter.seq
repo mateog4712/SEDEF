@@ -58,7 +58,7 @@ def qgram_filter(q,  q_pos,  q_len, r,  r_pos,  r_len) -> tuple[bool, str]:
     while ( qi < QSZ):
         dist += min(qgram_p[qi], qgram_r[qi])
         qgram_p[qi] = qgram_r[qi] = 0
-        qi+-1
+        qi+=1
     if (dist < minqg):
         # QGRAM_NORMAL_FAILED+=1
         return (False, f'q-grams {dist} < {minqg}')

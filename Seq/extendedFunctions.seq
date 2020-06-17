@@ -1,7 +1,7 @@
 from align_hit import *
-from Tree import *
+# from tree2 import *
 from hash import *
-from sliding import *
+from slidingO import *
 from globals import*
 from common import *
 
